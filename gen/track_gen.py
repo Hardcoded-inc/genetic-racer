@@ -21,4 +21,4 @@ for i in range(50):
     draw.line((x1, y1, x2, y2), fill=color, width=5)
 
 # Save the track image
-image.save("track.png")
+image.save("img/track.png")
