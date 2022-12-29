@@ -5,7 +5,7 @@ class Track:
         self.screen = screen
 
         # Load the track image and get its rect
-        self.image = pygame.image.load("track.png")
+        self.image = pygame.image.load("img/track.png")
         self.rect = self.image.get_rect()
 
     def draw(self):
