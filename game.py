@@ -9,7 +9,7 @@ class Game:
 
         # Set the window size and title
         self.screen = pygame.display.set_mode((640, 480))
-        pygame.display.set_caption("Racing Game")
+        pygame.display.set_caption("Genetic Racer")
 
         # Set the background color
         self.bg_color = (0, 0, 0)
