@@ -37,8 +37,8 @@ class Car:
             self.angle += self.steering
 
         # Update the car's position and angle
-        self.rect.x += self.speed * math.cos(self.angle)
-        self.rect.y += self.speed * math.sin(self.angle)
+        self.rect.x += self.speed * math.cos(math.radians(self.angle))
+        self.rect.y += self.speed * math.sin(math.radians(self.angle))
 
         # Handle collision with the edges of the screen
         if self.rect.left < 0 or self.rect.right > 640:
