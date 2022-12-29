@@ -48,3 +48,12 @@ class Car:
     def draw(self):
         # Rotate the car image
         rotated_image = pygame.transform.rotate(self.image, self.angle)
+
+        # Get the bounding rect of the rotated image
+        rotated_rect = rotated_image.get_rect()
+
+        # Set the rect's center to the original position of the car
+        rotated_rect.center = self.rect.center
+
+        # Draw the rotated image
+        self.screen.blit(rotated_image, rotated_rect)
