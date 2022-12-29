@@ -1,4 +1,6 @@
 import pygame
+from car import Car
+from track import Track
 
 class Game:
     def __init__(self):
@@ -14,6 +16,10 @@ class Game:
 
         # Set the clock to control the frame rate
         self.clock = pygame.time.Clock()
+
+        # Create the track and car
+        self.track = Track(self.screen)
+        self.car = Car(self.screen)
 
     def run(self):
         # Main game loop
@@ -37,13 +43,13 @@ class Game:
         pygame.quit()
 
     def update(self):
-        # Update the game state
-        pass
+        # Update the car's position
+        self.car.update()
 
     def draw(self):
-        # Draw the game
-        self.screen.fill(self.bg_color)
+        # Draw the track and car
+        self.track.draw()
+        self.car.draw()
+
+        # Update the display
         pygame.display.flip()
-
-
-
