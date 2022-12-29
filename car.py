@@ -1,4 +1,5 @@
 import pygame
+import math
 
 class Car:
     def __init__(self, screen):
@@ -8,16 +9,17 @@ class Car:
         self.image = pygame.image.load("img/car.png")
         self.rect = self.image.get_rect()
 
-        # Set the car's starting position
+        # Set the car's starting position and angle
         self.rect.center = (320, 240)
+        self.angle = 0
 
         # Set the car's speed
         self.speed = 0
 
-        # Set the car's acceleration and deceleration
+        # Set the car's acceleration, deceleration, and steering
         self.acceleration = 0.1
         self.deceleration = 0.1
-
+        self.steering = 0.1
 
     def update(self):
         # Handle keyboard input
@@ -29,8 +31,14 @@ class Car:
         else:
             self.speed *= self.deceleration
 
-        # Update the car's position
-        self.rect.x += self.speed
+        if keys[pygame.K_LEFT]:
+            self.angle -= self.steering
+        elif keys[pygame.K_RIGHT]:
+            self.angle += self.steering
+
+        # Update the car's position and angle
+        self.rect.x += self.speed * math.cos(self.angle)
+        self.rect.y += self.speed * math.sin(self.angle)
 
         # Handle collision with the edges of the screen
         if self.rect.left < 0 or self.rect.right > 640:
@@ -38,5 +46,5 @@ class Car:
             self.rect.center = (320, 240)
 
     def draw(self):
-        # Draw the car image
-        self.screen.blit(self.image, self.rect)
+        # Rotate the car image
+        rotated_image = pygame.transform.rotate(self.image, self.angle)
