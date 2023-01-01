@@ -1,6 +1,6 @@
 # Genetic Racer
 
-A racing game possessed by the AI driver.
+A racing game possessed by the AI driver.  
 Learned with genetic algorithm.
 
 ## Prequisites
