@@ -9,45 +9,71 @@ class Car:
     def __init__(self, screen):
         self.screen = screen
 
-        # Load the car image and get its rect
-        self.image = pygame.image.load("img/car.png")
+        # Set the car's starting position and angle
+        image = pygame.image.load("img/car.png")
+        self.image = pygame.transform.scale(image, (48, 96))
         self.rect = self.image.get_rect()
         self.rect.center = START_POSITION
         self.angle = START_ANGLE
 
-        # Set the car's starting position and angle
-        self.rect.center = (320, 240)
-        self.angle = 0
-
-        # Set the car's speed
-        self.speed = 0
+        # Set the car's velocity
+        self.vel = 0
 
         # Set the car's acceleration, deceleration, and steering
-        self.acceleration = 0.1
-        self.deceleration = 0.1
-        self.steering = 0.1
+        self.max_vel = 20
+        self.acceleration_rate = 0.2
+        self.braking_rate = 0.7
+        self.deceleration_rate = 0.1
+        self.steering = 10
+
+
+    def accelerate(self):
+        self.vel = min(self.vel + self.acceleration_rate, self.max_vel)
+
+    def brake(self):
+        self.vel = max(self.vel - self.braking_rate, 0)
+
+    def decelerate(self):
+        self.vel = max(self.vel - self.deceleration_rate, 0)
+
+    def move(self):
+        radians = math.radians(self.angle)
+        y_displacement = self.vel * math.cos(radians)
+        x_displacement = self.vel * math.sin(radians)
+
+        self.rect.x -= x_displacement
+        self.rect.y -= y_displacement
 
     def update(self):
         # Handle keyboard input
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:
-            self.speed += self.acceleration
+            self.accelerate()
+            # speed = math.sqrt(self.vel_x ** 2 + self.vel_y ** 2)
+            # angle = math.atan2(self.vel_y, self.vel_x)
+            # self.vel_x = (speed + self.acceleration_rate) * math.cos(angle)
+            # self.vel_y = (speed + self.acceleration_rate) * math.sin(angle)
         elif keys[pygame.K_DOWN]:
-            self.speed -= self.deceleration
+            self.brake()
+            # speed = math.sqrt(self.vel_x ** 2 + self.vel_y ** 2)
+            # angle = math.atan2(self.vel_y, self.vel_x) + math.pi
+            # self.vel_x = (speed - self.dec_rate) * math.cos(angle)
+            # self.vel_y = (speed - self.dec_rate) * math.sin(angle)
         else:
-            self.speed *= self.deceleration
+            self.decelerate()
+
 
         if keys[pygame.K_LEFT]:
-            self.angle -= self.steering
-        elif keys[pygame.K_RIGHT]:
             self.angle += self.steering
+        elif keys[pygame.K_RIGHT]:
+            self.angle -= self.steering
 
-        # Update the car's position and angle
-        self.rect.x += self.speed * math.cos(math.radians(self.angle))
-        self.rect.y += self.speed * math.sin(math.radians(self.angle))
+        self.move()
 
         # Handle collision with the edges of the screen
         if self.rect.left < 0 or self.rect.right > 640:
+            self.vel_x = 0
+            self.vel_y = 0
             self.rect.center = START_POSITION
             self.angle = START_ANGLE
 
