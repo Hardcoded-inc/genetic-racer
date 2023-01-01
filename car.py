@@ -62,16 +62,8 @@ class Car:
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:
             self.accelerate()
-            # speed = math.sqrt(self.vel_x ** 2 + self.vel_y ** 2)
-            # angle = math.atan2(self.vel_y, self.vel_x)
-            # self.vel_x = (speed + self.acceleration_rate) * math.cos(angle)
-            # self.vel_y = (speed + self.acceleration_rate) * math.sin(angle)
         elif keys[pygame.K_DOWN]:
             self.brake()
-            # speed = math.sqrt(self.vel_x ** 2 + self.vel_y ** 2)
-            # angle = math.atan2(self.vel_y, self.vel_x) + math.pi
-            # self.vel_x = (speed - self.dec_rate) * math.cos(angle)
-            # self.vel_y = (speed - self.dec_rate) * math.sin(angle)
         else:
             self.decelerate()
 
