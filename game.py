@@ -2,6 +2,8 @@ import pygame
 from car import Car
 from track import Track
 
+
+FPS = 30
 class Game:
     def __init__(self):
         # Initialize Pygame
@@ -25,10 +27,6 @@ class Game:
         # Main game loop
         running = True
         while running:
-            # Handle events
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
 
             # Update the game state
             self.update()
@@ -37,8 +35,12 @@ class Game:
             self.draw()
 
             # Limit the frame rate
-            self.clock.tick(60)
+            self.clock.tick(FPS)
 
+            # Handle events
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
         # Quit Pygame
         pygame.quit()
 
