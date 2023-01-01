@@ -58,8 +58,8 @@ class Car:
         self.angle = START_ANGLE
 
     def update(self):
-        # Handle keyboard input
         keys = pygame.key.get_pressed()
+
         if keys[pygame.K_UP]:
             self.accelerate()
         elif keys[pygame.K_DOWN]:
@@ -74,17 +74,6 @@ class Car:
             self.angle -= self.steering
 
         self.move()
-
-        # Handle collision with the edges of the screen
-        screen_width, screen_height = pygame.display.get_surface().get_size()
-
-        if (self.rect.left < 0
-        or self.rect.right > screen_width
-        or self.rect.top < 0
-        or self.rect.bottom > screen_height):
-            self.vel = 0
-            self.rect.center = START_POSITION
-            self.angle = START_ANGLE
 
 
     def draw(self):
