@@ -27,15 +27,14 @@ class Game:
         # Main game loop
         running = True
         while running:
+            # Limit the frame rate
+            self.clock.tick(FPS)
 
             # Update the game state
             self.update()
 
             # Draw the game
             self.draw()
-
-            # Limit the frame rate
-            self.clock.tick(FPS)
 
             # Handle events
             for event in pygame.event.get():
