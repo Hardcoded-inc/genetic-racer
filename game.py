@@ -55,5 +55,8 @@ class Game:
         self.track.draw()
         self.car.draw()
 
+        if self.car.is_colliding(self.track.track_border_mask) != None:
+            print("dupa")
+
         # Update the display
         pygame.display.flip()

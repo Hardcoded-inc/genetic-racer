@@ -46,6 +46,12 @@ class Car:
         self.rect.x -= x_displacement
         self.rect.y -= y_displacement
 
+    def is_colliding(self, mask, x=0, y=0):
+        car_mask = pygame.mask.from_surface(self.image)
+        offset = (int(self.rect.x - x), int(self.rect.y - y))
+        poi = mask.overlap(car_mask, offset)
+        return poi
+
     def update(self):
         # Handle keyboard input
         keys = pygame.key.get_pressed()
