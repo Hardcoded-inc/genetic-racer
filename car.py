@@ -4,19 +4,23 @@ from utils import scale_image
 
 
 START_POSITION = (180, 200)
-START_ANGLE = 0
+START_DIRECTION = 0
+DRIFT_VEL_THRESHOLD = 0.5
+DRIFT_FRICTION = 0.87
+
 
 class Car:
     def __init__(self, screen):
         self.screen = screen
 
-        # Set the car's starting position and angle
+        # Set the car's starting position and direction
         image = pygame.image.load("img/car.png")
         image = pygame.transform.scale(image, (48, 96))
         self.image = scale_image(image, 0.4)
         self.rect = self.image.get_rect()
         self.rect.center = START_POSITION
-        self.angle = START_ANGLE
+        self.direction = START_DIRECTION
+        self.drift_momentum = 0
 
         # Set the car's velocity
         self.vel = 0
@@ -24,9 +28,9 @@ class Car:
         # Set the car's acceleration, deceleration, and steering
         self.max_vel = 20
         self.acceleration_rate = 0.2
-        self.braking_rate = 0.7
         self.deceleration_rate = 0.1
-        self.steering = 10
+        self.braking_rate = 0.7
+        self.steering = 7
 
 
     def accelerate(self):
@@ -39,12 +43,23 @@ class Car:
         self.vel = max(self.vel - self.deceleration_rate, 0)
 
     def move(self):
-        radians = math.radians(self.angle)
-        y_displacement = self.vel * math.cos(radians)
-        x_displacement = self.vel * math.sin(radians)
+
+        y_displacement = 0
+        x_displacement = 0
+
+        dir_radians = math.radians(self.direction)
+        x_displacement += self.vel * math.sin(dir_radians)
+        y_displacement += self.vel * math.cos(dir_radians)
+
+        drift_direction = self.direction + 90
+        drift_dir_radians = math.radians(drift_direction)
+        x_displacement += self.drift_momentum * math.sin(drift_dir_radians)
+        x_displacement += self.drift_momentum * math.cos(drift_dir_radians)
+        self.drift_momentum *= DRIFT_FRICTION
 
         self.rect.x -= x_displacement
         self.rect.y -= y_displacement
+
 
     def collide(self, mask, x=0, y=0):
         car_mask = pygame.mask.from_surface(self.image)
@@ -55,31 +70,39 @@ class Car:
     def reset(self):
         self.vel = 0
         self.rect.center = START_POSITION
-        self.angle = START_ANGLE
+        self.prev_angle = START_DIRECTION
+        self.direction = START_DIRECTION
+
+    def get_drift_amount(self):
+        if self.vel > DRIFT_VEL_THRESHOLD:
+            return self.vel * self.steering / 70.0
+        else:
+            return 0
+
+    def turn_left(self):
+        self.direction += self.steering
+        self.drift_momentum -= self.get_drift_amount()
+
+    def turn_right(self):
+        self.direction -= self.steering
+        self.drift_momentum += self.get_drift_amount()
+
 
     def update(self):
-        # Handle keyboard input
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:
             self.accelerate()
-            # speed = math.sqrt(self.vel_x ** 2 + self.vel_y ** 2)
-            # angle = math.atan2(self.vel_y, self.vel_x)
-            # self.vel_x = (speed + self.acceleration_rate) * math.cos(angle)
-            # self.vel_y = (speed + self.acceleration_rate) * math.sin(angle)
         elif keys[pygame.K_DOWN]:
             self.brake()
-            # speed = math.sqrt(self.vel_x ** 2 + self.vel_y ** 2)
-            # angle = math.atan2(self.vel_y, self.vel_x) + math.pi
-            # self.vel_x = (speed - self.dec_rate) * math.cos(angle)
-            # self.vel_y = (speed - self.dec_rate) * math.sin(angle)
         else:
             self.decelerate()
 
 
         if keys[pygame.K_LEFT]:
-            self.angle += self.steering
+            self.turn_left()
         elif keys[pygame.K_RIGHT]:
-            self.angle -= self.steering
+            self.turn_right()
+
 
         self.move()
 
@@ -92,12 +115,12 @@ class Car:
         or self.rect.bottom > screen_height):
             self.vel = 0
             self.rect.center = START_POSITION
-            self.angle = START_ANGLE
+            self.direction = START_DIRECTION
 
 
     def draw(self):
         # Rotate the car image
-        rotated_image = pygame.transform.rotate(self.image, self.angle)
+        rotated_image = pygame.transform.rotate(self.image, self.direction)
 
         # Get the bounding rect of the rotated image
         rotated_rect = rotated_image.get_rect()
