@@ -38,6 +38,13 @@ class Car:
     def decelerate(self):
         self.vel = max(self.vel - self.deceleration_rate, 0)
 
+    def turn_left():
+            self.angle += self.steering
+
+    def turn_right():
+            self.angle -= self.steering
+
+
     def move(self):
         radians = math.radians(self.angle)
         y_displacement = self.vel * math.cos(radians)
@@ -67,11 +74,10 @@ class Car:
         else:
             self.decelerate()
 
-
         if keys[pygame.K_LEFT]:
-            self.angle += self.steering
+            turn_left()
         elif keys[pygame.K_RIGHT]:
-            self.angle -= self.steering
+            turn_right()
 
         self.move()
 
