@@ -102,3 +102,6 @@ venv.bak/
 
 # Pyre type checker
 .pyre/
+
+# other
+.DS_Store
