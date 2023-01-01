@@ -1,6 +1,10 @@
 import pygame
 import math
 
+
+START_POSITION = (320, 240)
+START_ANGLE = 0
+
 class Car:
     def __init__(self, screen):
         self.screen = screen
@@ -8,6 +12,8 @@ class Car:
         # Load the car image and get its rect
         self.image = pygame.image.load("img/car.png")
         self.rect = self.image.get_rect()
+        self.rect.center = START_POSITION
+        self.angle = START_ANGLE
 
         # Set the car's starting position and angle
         self.rect.center = (320, 240)
@@ -42,8 +48,9 @@ class Car:
 
         # Handle collision with the edges of the screen
         if self.rect.left < 0 or self.rect.right > 640:
-            self.speed = 0
-            self.rect.center = (320, 240)
+            self.rect.center = START_POSITION
+            self.angle = START_ANGLE
+
 
     def draw(self):
         # Rotate the car image
