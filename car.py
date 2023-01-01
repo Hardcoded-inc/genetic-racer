@@ -13,7 +13,7 @@ class Car:
         # Set the car's starting position and angle
         image = pygame.image.load("img/car.png")
         image = pygame.transform.scale(image, (48, 96))
-        self.image = scale_image(image, 0.5)
+        self.image = scale_image(image, 0.4)
         self.rect = self.image.get_rect()
         self.rect.center = START_POSITION
         self.angle = START_ANGLE
@@ -46,11 +46,16 @@ class Car:
         self.rect.x -= x_displacement
         self.rect.y -= y_displacement
 
-    def is_colliding(self, mask, x=0, y=0):
+    def collide(self, mask, x=0, y=0):
         car_mask = pygame.mask.from_surface(self.image)
         offset = (int(self.rect.x - x), int(self.rect.y - y))
         poi = mask.overlap(car_mask, offset)
         return poi
+
+    def reset(self):
+        self.vel = 0
+        self.rect.center = START_POSITION
+        self.angle = START_ANGLE
 
     def update(self):
         # Handle keyboard input
