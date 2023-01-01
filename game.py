@@ -1,16 +1,19 @@
 import pygame
 from car import Car
 from track import Track
+from utils import scale_image
 
 
+WIDTH, HEIGHT = (810, 810)
 FPS = 30
+
 class Game:
     def __init__(self):
         # Initialize Pygame
         pygame.init()
 
         # Set the window size and title
-        self.screen = pygame.display.set_mode((640, 480))
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("Genetic Racer")
 
         # Set the background color

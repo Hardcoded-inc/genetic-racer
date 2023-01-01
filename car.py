@@ -1,8 +1,9 @@
 import pygame
 import math
+from utils import scale_image
 
 
-START_POSITION = (320, 240)
+START_POSITION = (180, 200)
 START_ANGLE = 0
 
 class Car:
@@ -11,7 +12,8 @@ class Car:
 
         # Set the car's starting position and angle
         image = pygame.image.load("img/car.png")
-        self.image = pygame.transform.scale(image, (48, 96))
+        image = pygame.transform.scale(image, (48, 96))
+        self.image = scale_image(image, 0.5)
         self.rect = self.image.get_rect()
         self.rect.center = START_POSITION
         self.angle = START_ANGLE
@@ -71,9 +73,13 @@ class Car:
         self.move()
 
         # Handle collision with the edges of the screen
-        if self.rect.left < 0 or self.rect.right > 640:
-            self.vel_x = 0
-            self.vel_y = 0
+        screen_width, screen_height = pygame.display.get_surface().get_size()
+
+        if (self.rect.left < 0
+        or self.rect.right > screen_width
+        or self.rect.top < 0
+        or self.rect.bottom > screen_height):
+            self.vel = 0
             self.rect.center = START_POSITION
             self.angle = START_ANGLE
 
