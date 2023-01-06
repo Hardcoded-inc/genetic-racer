@@ -24,7 +24,7 @@ class Game:
 
         # Create the track and car
         self.track = Track(self.screen)
-        self.car = Car(self.screen)
+        self.car = Car(self.screen, self.track)
 
     def run(self):
         # Main game loop
