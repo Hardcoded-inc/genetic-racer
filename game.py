@@ -58,6 +58,7 @@ class Game:
                 if event.type == pygame.QUIT:
                     running = False
         pygame.quit()
+        exit(0)
 
     def update(self):
         self.car.update()
@@ -80,6 +81,9 @@ class Game:
         if self.car.collide(self.track.track_border_mask) is not None:
             if(self.ai_mode):
                 self.car.kill()
+            else:
+                self.car.reset()
+                self.currentGate = Gate(self.screen, self.car)
             
 
         self.currentGate.draw()
