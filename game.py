@@ -14,8 +14,9 @@ class Game:
     state_size = 11
     frame_rate = FPS
 
-    def __init__(self):
+    def __init__(self, ai_mode=False):
         pygame.init()
+        self.ai_mode = ai_mode
 
         # Set the window size and title
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -59,9 +60,11 @@ class Game:
             self.currentGate = Gate(self.screen, self.currentGate)
 
 
-
-        if self.car.collide(self.track.track_border_mask) != None:
-            self.car.kill()
+        if self.car.collide(self.track.track_border_mask) is not None:
+            if(self.ai_mode):
+                self.car.kill()
+            else:
+                self.car.reset()
 
         self.currentGate.draw()
 
