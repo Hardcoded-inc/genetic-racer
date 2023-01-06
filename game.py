@@ -10,12 +10,13 @@ FPS = 30
 
 
 class Game:
-    actions_count = 8
+    actions_count = 9
     state_size = 11
     frame_rate = FPS
 
-    def __init__(self):
+    def __init__(self, ai_mode=False):
         pygame.init()
+        self.ai_mode = ai_mode
 
         # Set the window size and title
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -59,9 +60,13 @@ class Game:
             # initialize next gate
             self.currentGate = Gate(self.screen, self.car, self.currentGate)
 
+
         if self.car.collide(self.track.track_border_mask) is not None:
-            self.car.reset()
-            self.currentGate = Gate(self.screen, self.car)
+            if(self.ai_mode):
+                self.car.kill()
+            else:
+                self.car.reset()
+                self.currentGate = Gate(self.screen, self.car)
 
         self.currentGate.draw()
 
@@ -74,6 +79,7 @@ class Game:
 
     def new_episode(self):
         self.car.reset()
+        self.currentGate = Gate(self.screen, self.car)
 
     def get_state(self):
         return self.car.get_state()
@@ -81,7 +87,7 @@ class Game:
     def make_action(self, action):
         # returns reward
         action_no = np.argmax(action)
-        self.car.updateWithAction(action_no)
+        self.car.update_with_action(action_no)
         return self.car.reward
 
     def is_episode_finished(self):

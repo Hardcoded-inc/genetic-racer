@@ -7,8 +7,3 @@ if __name__ == "__main__":
 
     # Run the game
     game.run()
-
-
-
-
-
