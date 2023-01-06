@@ -42,6 +42,7 @@ class Game:
 
     def update(self):
         self.car.update()
+        print(self.car.distances)
 
     def draw(self):
         # Draw the track and car

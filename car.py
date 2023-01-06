@@ -33,15 +33,16 @@ class Car:
 
         ray_len = 560
         self.beam_surface = pygame.Surface((ray_len, ray_len), pygame.SRCALPHA)
-        #mask_surface = pygame.Surface((810, 810), pygame.SRCALPHA)
+
         mask_surface = track.track_border
-        #mask_surface.fill((255, 0, 0))
 
         mask = pygame.mask.from_surface(mask_surface)
         mask_fx = pygame.mask.from_surface(pygame.transform.flip(mask_surface, True, False))
         mask_fy = pygame.mask.from_surface(pygame.transform.flip(mask_surface, False, True))
         mask_fx_fy = pygame.mask.from_surface(pygame.transform.flip(mask_surface, True, True))
         self.flipped_masks = [[mask, mask_fy], [mask_fx, mask_fx_fy]]
+
+        self.distances = []
 
     def accelerate(self):
         self.vel = min(self.vel + self.acceleration_rate, self.max_vel)
@@ -112,6 +113,7 @@ class Car:
         self.draw_beams()
 
     def draw_beams(self):
+        self.distances = []
         for angle in range(0, 359, 45):
             self.draw_beam(self.screen, angle, self.rect.center)
 
@@ -139,8 +141,9 @@ class Car:
             hx = 809 - hit[0] if flip_x else hit[0]
             hy = 809 - hit[1] if flip_y else hit[1]
             hit_pos = (hx, hy)
-            print(hit_pos)
 
             pygame.draw.line(surface, BLUE, pos, hit_pos)
             pygame.draw.circle(surface, GREEN, hit_pos, 3)
-            #pygame.draw.circle(surface, (255, 255, 0), mouse_pos, 3)
+            self.distances.append(math.hypot(hit_pos[0] - pos[0], hit_pos[1] - pos[1]))
+        else:
+            self.distances.append(None)
