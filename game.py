@@ -10,7 +10,7 @@ FPS = 30
 
 
 class Game:
-    actions_count = 8
+    actions_count = 9
     state_size = 11
     frame_rate = FPS
 
@@ -58,10 +58,10 @@ class Game:
             # initialize next gate
             self.currentGate = Gate(self.screen, self.currentGate)
 
-        if self.car.collide(self.track.track_border_mask) is not None:
-            self.car.reset()
-        # if self.car.collide(self.track.track_border_mask) != None:
-            # self.car.reset()
+
+
+        if self.car.collide(self.track.track_border_mask) != None:
+            self.car.kill()
 
         self.currentGate.draw()
 
@@ -81,7 +81,7 @@ class Game:
     def make_action(self, action):
         # returns reward
         action_no = np.argmax(action)
-        self.car.updateWithAction(action_no)
+        self.car.update_with_action(action_no)
         return self.car.reward
 
     def is_episode_finished(self):
