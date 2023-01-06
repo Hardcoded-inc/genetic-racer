@@ -1,11 +1,12 @@
 import pygame
 from car import Car
 from track import Track
+from gate import Gate
 from utils import scale_image
-
 
 WIDTH, HEIGHT = (810, 810)
 FPS = 30
+
 
 class Game:
     actions_count = 8
@@ -25,6 +26,7 @@ class Game:
         # Create the track and car
         self.track = Track(self.screen)
         self.car = Car(self.screen, self.track)
+        self.currentGate = Gate(self.screen)
 
     def run(self):
         # Main game loop
@@ -49,12 +51,19 @@ class Game:
         self.track.draw()
         self.car.draw()
 
-        if self.car.collide(self.track.track_border_mask) != None:
+        if self.car.collide(self.currentGate.gate_mask) is not None:
+            # add points
+
+            # initialize next gate
+            self.currentGate = Gate(self.screen, self.currentGate)
+
+        if self.car.collide(self.track.track_border_mask) is not None:
             self.car.reset()
+
+        self.currentGate.draw()
 
         # Update the display
         pygame.display.flip()
-
 
     # ======================== #
     #      Q-Learning API      #

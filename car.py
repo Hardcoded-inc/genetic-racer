@@ -8,7 +8,6 @@ START_ANGLE = 0
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
-
 class Car:
     def __init__(self, screen, track):
         self.screen = screen
@@ -95,7 +94,6 @@ class Car:
             self.turn_right()
 
         self.move()
-
 
     def draw(self):
         # Rotate the car image
