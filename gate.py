@@ -1,7 +1,7 @@
 import pygame
 from utils import scale_image
 
-GATES_AMOUNT = 11
+GATES_AMOUNT = 27
 
 
 class Gate:
