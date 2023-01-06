@@ -1,4 +1,5 @@
 import pygame
+import numpy as np
 from car import Car
 from track import Track
 from gate import Gate
@@ -59,15 +60,35 @@ class Game:
 
         if self.car.collide(self.track.track_border_mask) is not None:
             self.car.reset()
+        # if self.car.collide(self.track.track_border_mask) != None:
+            # self.car.reset()
 
         self.currentGate.draw()
 
         # Update the display
         pygame.display.flip()
 
-    # ======================== #
+    # ------------------------ #
     #      Q-Learning API      #
-    # ======================== #
+    # ------------------------ #
 
     def new_episode(self):
         self.car.reset()
+
+    def get_state(self):
+        return self.car.get_state()
+
+    def make_action(self, action):
+        # returns reward
+        action_no = np.argmax(action)
+        self.car.updateWithAction(action_no)
+        return self.car.reward
+
+    def is_episode_finished(self):
+        return self.car.dead
+
+    def get_score(self):
+        return self.car.score
+
+    def get_lifespan(self):
+        return self.car.lifespan
