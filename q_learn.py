@@ -6,12 +6,11 @@ import math
 import random
 
 
-class QLearning:
+class QLAgent:
     def __init__(self, game):
 
         self.game = game
-        self.game.new_episode()
-
+        self.pretrained = False
 
         # ------------------------ #
         #       Model params       #
@@ -66,8 +65,8 @@ class QLearning:
 
         self.replay_memory = ReplayMemory(self.memory_size)
 
-        sleep(1)
-        self.pretrain()
+
+        print("we're in")
         # self.update_target_network_params()
 
     def update_target_network_params(self):
@@ -88,6 +87,7 @@ class QLearning:
 
             # Pick a random movement and do it to populate the memory thing
             action = random.choice(self.possible_actions)
+            action = 4
             action_no = np.argmax(action)
 
             # Get next

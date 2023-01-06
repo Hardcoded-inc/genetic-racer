@@ -4,6 +4,9 @@ from car import Car
 from track import Track
 from gate import Gate
 from utils import scale_image
+from q_learn import QLAgent
+
+
 
 WIDTH, HEIGHT = (810, 810)
 FPS = 30
@@ -31,14 +34,25 @@ class Game:
         self.car = Car(self.screen, self.track)
         self.currentGate = Gate(self.screen)
 
+        if(ai_mode):
+            self.ql_agent = QLAgent(self)
+
+
+    def play_step(self):
+        # if(ai_mode):
+        #     if self.ql_agent.pretrained is False:
+        #         self.ql_agent.pretrain()
+
+
+        self.clock.tick(FPS)
+        self.update()
+        self.draw()
+
     def run(self):
         # Main game loop
         running = True
         while running:
-
-            self.clock.tick(FPS)
-            self.update()
-            self.draw()
+            self.play_step()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
