@@ -53,3 +53,11 @@ class Game:
 
         # Update the display
         pygame.display.flip()
+
+
+    # ======================== #
+    #      Q-Learning API      #
+    # ======================== #
+
+    def new_episode(self):
+        self.car.reset()
