@@ -80,9 +80,7 @@ class Game:
         if self.car.collide(self.track.track_border_mask) is not None:
             if(self.ai_mode):
                 self.car.kill()
-            else:
-                self.car.reset()
-                self.currentGate = Gate(self.screen, self.car)
+            
 
         self.currentGate.draw()
 
