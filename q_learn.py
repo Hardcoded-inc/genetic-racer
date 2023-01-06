@@ -5,7 +5,6 @@ import numpy as np
 import math
 import random
 
-
 class QLAgent:
     def __init__(self, game):
 
@@ -66,7 +65,10 @@ class QLAgent:
         self.replay_memory = ReplayMemory(self.memory_size)
 
 
-        print("we're in")
+        print("QL Agent initilized")
+        print("Start pretraining...")
+        self.pretrain()
+
         # self.update_target_network_params()
 
     def update_target_network_params(self):
@@ -78,16 +80,20 @@ class QLAgent:
     def pretrain(self):
         state = []
         new_episode = False
+        step = 0
 
+        def step_function():
+        # for step in range(self.pretrain_length):
+            nonlocal step
+            nonlocal state
+            nonlocal new_episode
 
-        for step in range(self.pretrain_length):
             print(f"step {step}")
             if step == 0:
                 state = self.game.get_state()
 
             # Pick a random movement and do it to populate the memory thing
             action = random.choice(self.possible_actions)
-            action = 4
             action_no = np.argmax(action)
 
             # Get next
@@ -103,6 +109,12 @@ class QLAgent:
             else:
                 self.replay_memory.store((state, action, reward, next_state, False))
                 state = next_state
+
+            self.game.clock.tick(30)
+            step += 1
+
+
+        self.game.run(step_function)
 
         print("Pre-Training finished!")
 

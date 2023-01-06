@@ -89,28 +89,29 @@ class Car:
         self.vel = 0
         self.rect.center = START_POSITION
         self.angle = START_ANGLE
+        self.dead = False
 
     def update_with_action(self, action_no):
         if action_no == 0:
-            self.turn_left()
+            self.accelerate()
         elif action_no == 1:
-            self.turn_right()
+            self.turn_left()
+            self.accelerate()
         elif action_no == 2:
+            self.turn_right()
             self.accelerate()
         elif action_no == 3:
-            self.decelerate()
+            self.turn_left()
         elif action_no == 4:
-            self.accelerate()
-            self.turn_left()
+            self.turn_right()
         elif action_no == 5:
-            self.accelerate()
-            self.turn_right()
+            self.decelerate()
         elif action_no == 6:
-            self.decelerate()
             self.turn_left()
-        elif action_no == 7:
             self.decelerate()
+        elif action_no == 7:
             self.turn_right()
+            self.decelerate()
         elif action_no == 8:
             pass
 
@@ -157,10 +158,10 @@ class Car:
             # Draw the rotated image
             self.screen.blit(rotated_image, rotated_rect)
 
-        self.distances = self.draw_beams(self.flipped_masks, self.gate_beam_surface, BLUE)
+            self.distances = self.draw_beams(self.flipped_masks, self.gate_beam_surface, BLUE)
 
-        if self.current_gate is not None:
-            self.gate_distances = self.draw_beams(self.gate_flipped_masks, self.gate_beam_surface, RED)
+            if self.current_gate is not None:
+                self.gate_distances = self.draw_beams(self.gate_flipped_masks, self.gate_beam_surface, RED)
 
     def update_currect_gate(self, gate):
         self.current_gate = gate

@@ -1,6 +1,7 @@
 import sys
 import pygame
 from game import Game
+from q_learn import QLAgent
 
 
 if __name__ == "__main__":
@@ -12,7 +13,7 @@ if __name__ == "__main__":
     if(ai_mode):
         print("Started in AI Mode")
         game = Game(ai_mode=True, debug=debug)
-        game.run()
+        ql_agent = QLAgent(game)
 
     else:
         game = Game(debug=debug)
