@@ -16,10 +16,15 @@ class Car:
         self.image = scale_image(image, 0.4)
         self.rect = self.image.get_rect()
         self.rect.center = START_POSITION
-        self.angle = START_ANGLE
 
-        # Set the car's velocity
+        # state
         self.vel = 0
+        self.angle = START_ANGLE
+        self.dead = False
+        self.reward = 0
+        self.score = 0
+        self.lifespan = 0
+
 
         # Set the car's acceleration, deceleration, and steering
         self.max_vel = 20
