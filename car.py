@@ -1,5 +1,6 @@
 import pygame
 import math
+import numpy as np
 from utils import scale_image
 
 
@@ -13,12 +14,14 @@ class Car:
     def __init__(self, screen, track):
         self.screen = screen
         self.track = track
+
         # Set the car's starting position and angle
         image = pygame.image.load("img/car.png")
         image = pygame.transform.scale(image, (48, 96))
         self.image = scale_image(image, 0.4)
         self.rect = self.image.get_rect()
         self.rect.center = START_POSITION
+        self.beams_count = 8
 
         # state
         self.vel = 0
@@ -27,6 +30,7 @@ class Car:
         self.reward = 0
         self.score = 0
         self.lifespan = 0
+        self.distances = []
 
 
         # Set the car's acceleration, deceleration, and steering
@@ -47,7 +51,9 @@ class Car:
         mask_fx_fy = pygame.mask.from_surface(pygame.transform.flip(mask_surface, True, True))
         self.flipped_masks = [[mask, mask_fy], [mask_fx, mask_fx_fy]]
 
-        self.distances = []
+    def kill(self):
+        self.dead = True
+        self.distances = list(np.zeros(self.beams_count))
 
     def accelerate(self):
         self.vel = min(self.vel + self.acceleration_rate, self.max_vel)
@@ -63,7 +69,6 @@ class Car:
 
     def turn_right(self):
             self.angle -= self.steering
-
 
     def move(self):
         radians = math.radians(self.angle)
@@ -84,6 +89,42 @@ class Car:
         self.rect.center = START_POSITION
         self.angle = START_ANGLE
 
+    def update_with_action(self, action_no):
+        if action_no == 0:
+            self.turn_left()
+        elif action_no == 1:
+            self.turn_right()
+        elif action_no == 2:
+            self.accelerate()
+        elif action_no == 3:
+            self.decelerate()
+        elif action_no == 4:
+            self.accelerate()
+            self.turn_left()
+        elif action_no == 5:
+            self.accelerate()
+            self.turn_right()
+        elif action_no == 6:
+            self.decelerate()
+            self.turn_left()
+        elif action_no == 7:
+            self.decelerate()
+            self.turn_right()
+        elif action_no == 8:
+            pass
+
+        reward = 0
+
+        if not self.dead:
+            self.lifespan += 1
+            self.move()
+
+            # TODO: check_rewars_gates()
+            # reward = self.check_reward_gates()
+
+        return reward
+
+
     def update(self):
         keys = pygame.key.get_pressed()
 
@@ -103,23 +144,24 @@ class Car:
 
 
     def draw(self):
-        # Rotate the car image
-        rotated_image = pygame.transform.rotate(self.image, self.angle)
+        if (not self.dead):
+            # Rotate the car image
+            rotated_image = pygame.transform.rotate(self.image, self.angle)
 
-        # Get the bounding rect of the rotated image
-        rotated_rect = rotated_image.get_rect()
+            # Get the bounding rect of the rotated image
+            rotated_rect = rotated_image.get_rect()
 
-        # Set the rect's center to the original position of the car
-        rotated_rect.center = self.rect.center
+            # Set the rect's center to the original position of the car
+            rotated_rect.center = self.rect.center
 
-        # Draw the rotated image
-        self.screen.blit(rotated_image, rotated_rect)
+            # Draw the rotated image
+            self.screen.blit(rotated_image, rotated_rect)
 
-        self.draw_beams()
+            self.draw_beams()
 
     def draw_beams(self):
         self.distances = []
-        for angle in range(0, 359, 45):
+        for angle in range(0, 359, int(360 / self.beams_count)):
             self.draw_beam(self.screen, angle, self.rect.center)
 
     def draw_beam(self, surface, angle, pos):
@@ -152,3 +194,40 @@ class Car:
             self.distances.append(math.hypot(hit_pos[0] - pos[0], hit_pos[1] - pos[1]))
         else:
             self.distances.append(None)
+
+    def get_state(self):
+
+        # TODO: normalization
+        # normalizedState = [*normalizedBeams, normalizedVelocity, normalizedAngleOfNextGate]
+
+        return [
+            self.vel,
+            self.angle,
+            self.distances,
+        ]
+
+
+
+#
+#     def normalize(self):
+#         self.setVisionVectors()
+#         normalizedVisionVectors = [1 - (max(1.0, line) / self.vectorLength) for line in self.collisionLineDistances]
+#
+#         normalizedForwardVelocity = max(0.0, self.vel / self.maxSpeed)
+#         normalizedReverseVelocity = max(0.0, self.vel / self.maxReverseSpeed)
+#         if self.driftMomentum > 0:
+#             normalizedPosDrift = self.driftMomentum / 5
+#             normalizedNegDrift = 0
+#         else:
+#             normalizedPosDrift = 0
+#             normalizedNegDrift = self.driftMomentum / -5
+#
+#         normalizedAngleOfNextGate = (get_angle(self.direction) - get_angle(self.directionToRewardGate)) % 360
+#         if normalizedAngleOfNextGate > 180:
+#             normalizedAngleOfNextGate = -1 * (360 - normalizedAngleOfNextGate)
+#
+#         normalizedAngleOfNextGate /= 180
+#
+#         normalizedState = [*normalizedVisionVectors, normalizedForwardVelocity, normalizedReverseVelocity,
+#                            normalizedPosDrift, normalizedNegDrift, normalizedAngleOfNextGate]
+#         return np.array(normalizedState)
