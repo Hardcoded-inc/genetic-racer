@@ -8,6 +8,10 @@ WIDTH, HEIGHT = (810, 810)
 FPS = 30
 
 class Game:
+    actions_count = 8
+    state_size = 11
+    frame_rate = FPS
+
     def __init__(self):
         pygame.init()
 

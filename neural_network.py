@@ -13,12 +13,12 @@ DEFAULT_NN_ARCHITECTURE = [
 ]
 
 class NeuralNetwork:
-    def __init__(self):
+    def __init__(self, learning_rate=DEFAULT_LEARNING_RATE, nn_architecture=DEFAULT_NN_ARCHITECTURE):
         self.verbose = True
         self.callback = None
 
         self.seed = DEFAULT_SEED
-        self.nn_architecture = DEFAULT_NN_ARCHITECTURE
+        self.nn_architecture = nn_architecture
 
         self.cost_history = []
         self.accuracy_history = []
@@ -28,7 +28,7 @@ class NeuralNetwork:
         self.Y = None
 
         self.epochs = DEFAULT_EPOCHS
-        self.learning_rate = DEFAULT_LEARNING_RATE
+        self.learning_rate = learning_rate
 
 
 
