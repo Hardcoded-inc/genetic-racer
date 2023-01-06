@@ -27,7 +27,7 @@ class Game:
         # Create the track and car
         self.track = Track(self.screen)
         self.car = Car(self.screen, self.track)
-        self.currentGate = Gate(self.screen)
+        self.currentGate = Gate(self.screen, self.car)
 
     def run(self):
         # Main game loop
@@ -45,7 +45,8 @@ class Game:
 
     def update(self):
         self.car.update()
-        print(self.car.distances)
+        print("border distances: ", self.car.distances)
+        print("Gate distances: ", self.car.gate_distances)
 
     def draw(self):
         # Draw the track and car
@@ -56,12 +57,11 @@ class Game:
             # add points
 
             # initialize next gate
-            self.currentGate = Gate(self.screen, self.currentGate)
+            self.currentGate = Gate(self.screen, self.car, self.currentGate)
 
         if self.car.collide(self.track.track_border_mask) is not None:
             self.car.reset()
-        # if self.car.collide(self.track.track_border_mask) != None:
-            # self.car.reset()
+            self.currentGate = Gate(self.screen, self.car)
 
         self.currentGate.draw()
 

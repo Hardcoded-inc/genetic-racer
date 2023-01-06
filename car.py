@@ -1,6 +1,6 @@
 import pygame
 import math
-from utils import scale_image
+from utils import scale_image, flip_surface
 
 
 START_POSITION = (180, 200)
@@ -8,6 +8,9 @@ START_ANGLE = 0
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
+RAY_LEN = 560
+
+
 class Car:
     def __init__(self, screen, track):
         self.screen = screen
@@ -27,7 +30,6 @@ class Car:
         self.score = 0
         self.lifespan = 0
 
-
         # Set the car's acceleration, deceleration, and steering
         self.max_vel = 20
         self.acceleration_rate = 0.2
@@ -35,18 +37,16 @@ class Car:
         self.deceleration_rate = 0.1
         self.steering = 10
 
-        ray_len = 560
-        self.beam_surface = pygame.Surface((ray_len, ray_len), pygame.SRCALPHA)
+        self.beam_surface = pygame.Surface((RAY_LEN, RAY_LEN), pygame.SRCALPHA)
 
-        mask_surface = track.track_border
-
-        mask = pygame.mask.from_surface(mask_surface)
-        mask_fx = pygame.mask.from_surface(pygame.transform.flip(mask_surface, True, False))
-        mask_fy = pygame.mask.from_surface(pygame.transform.flip(mask_surface, False, True))
-        mask_fx_fy = pygame.mask.from_surface(pygame.transform.flip(mask_surface, True, True))
-        self.flipped_masks = [[mask, mask_fy], [mask_fx, mask_fx_fy]]
+        self.flipped_masks = flip_surface(track.track_border)
 
         self.distances = []
+        self.gate_distances = []
+
+        self.current_gate = None
+        self.gate_beam_surface = None
+        self.gate_flipped_masks = None
 
     def accelerate(self):
         self.vel = min(self.vel + self.acceleration_rate, self.max_vel)
@@ -58,11 +58,10 @@ class Car:
         self.vel = max(self.vel - self.deceleration_rate, 0)
 
     def turn_left(self):
-            self.angle += self.steering
+        self.angle += self.steering
 
     def turn_right(self):
-            self.angle -= self.steering
-
+        self.angle -= self.steering
 
     def move(self):
         radians = math.radians(self.angle)
@@ -113,29 +112,39 @@ class Car:
         # Draw the rotated image
         self.screen.blit(rotated_image, rotated_rect)
 
-        self.draw_beams()
+        self.distances = self.draw_beams(self.flipped_masks, self.gate_beam_surface, BLUE)
 
-    def draw_beams(self):
-        self.distances = []
+        if self.current_gate is not None:
+            self.gate_distances = self.draw_beams(self.gate_flipped_masks, self.gate_beam_surface, RED)
+
+    def update_currect_gate(self, gate):
+        self.current_gate = gate
+
+        self.gate_beam_surface = pygame.Surface((RAY_LEN, RAY_LEN), pygame.SRCALPHA)
+        self.gate_flipped_masks = flip_surface(gate.gate)
+
+    def draw_beams(self, flipped_masks, beam_surface, color):
+        distances = []
         for angle in range(0, 359, 45):
-            self.draw_beam(self.screen, angle, self.rect.center)
-
-    def draw_beam(self, surface, angle, pos):
+            dist = self.draw_beam(self.screen, angle, self.rect.center, flipped_masks, beam_surface, color)
+            distances.append(dist)
+        return distances
+    def draw_beam(self, surface, angle, pos, flipped_masks, beam_surface, color):
         c = math.cos(math.radians(angle - self.angle))
         s = math.sin(math.radians(angle - self.angle))
 
         flip_x = c < 0
         flip_y = s < 0
-        filpped_mask = self.flipped_masks[flip_x][flip_y]
+        filpped_mask = flipped_masks[flip_x][flip_y]
 
         # compute beam final point
         x_dest = 405 + 810 * abs(c)
         y_dest = 405 + 810 * abs(s)
 
-        self.beam_surface.fill((0, 0, 0, 0))
+        beam_surface.fill((0, 0, 0, 0))
 
-        pygame.draw.line(self.beam_surface, BLUE, (405, 405), (x_dest, y_dest))
-        beam_mask = pygame.mask.from_surface(self.beam_surface)
+        pygame.draw.line(beam_surface, color, (405, 405), (x_dest, y_dest))
+        beam_mask = pygame.mask.from_surface(beam_surface)
 
         offset_x = 405 - pos[0] if flip_x else pos[0] - 405
         offset_y = 405 - pos[1] if flip_y else pos[1] - 405
@@ -145,8 +154,7 @@ class Car:
             hy = 809 - hit[1] if flip_y else hit[1]
             hit_pos = (hx, hy)
 
-            pygame.draw.line(surface, BLUE, pos, hit_pos)
-            pygame.draw.circle(surface, GREEN, hit_pos, 3)
-            self.distances.append(math.hypot(hit_pos[0] - pos[0], hit_pos[1] - pos[1]))
-        else:
-            self.distances.append(None)
+            pygame.draw.line(surface, color, pos, hit_pos)
+            pygame.draw.circle(surface, color, hit_pos, 3)
+            return math.hypot(hit_pos[0] - pos[0], hit_pos[1] - pos[1])
+
