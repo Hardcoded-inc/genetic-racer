@@ -32,7 +32,7 @@ class Game:
         # Create the track and car
         self.track = Track(self.screen)
         self.car = Car(self.screen, self.track)
-        self.currentGate = Gate(self.screen)
+        self.currentGate = Gate(self.screen, self.car)
 
         if(ai_mode):
             self.ql_agent = QLAgent(self)
@@ -61,7 +61,9 @@ class Game:
 
     def update(self):
         self.car.update()
-        if(self.debug): print(self.car.distances)
+        if(self.debug):
+            print("border distances: ", self.car.distances)
+            print("Gate distances: ", self.car.gate_distances)
 
     def draw(self):
         # Draw the track and car
@@ -72,7 +74,7 @@ class Game:
             # add points
 
             # initialize next gate
-            self.currentGate = Gate(self.screen, self.currentGate)
+            self.currentGate = Gate(self.screen, self.car, self.currentGate)
 
 
         if self.car.collide(self.track.track_border_mask) is not None:
@@ -80,6 +82,7 @@ class Game:
                 self.car.kill()
             else:
                 self.car.reset()
+                self.currentGate = Gate(self.screen, self.car)
 
         self.currentGate.draw()
 
@@ -92,6 +95,7 @@ class Game:
 
     def new_episode(self):
         self.car.reset()
+        self.currentGate = Gate(self.screen, self.car)
 
     def get_state(self):
         return self.car.get_state()

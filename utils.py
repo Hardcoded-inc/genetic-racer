@@ -26,3 +26,10 @@ def convert_prob_into_class(probs):
     probs_[probs_ > 0.5] = 1
     probs_[probs_ <= 0.5] = 0
     return probs_
+
+def flip_surface(mask_surface):
+    mask = pygame.mask.from_surface(mask_surface)
+    mask_fx = pygame.mask.from_surface(pygame.transform.flip(mask_surface, True, False))
+    mask_fy = pygame.mask.from_surface(pygame.transform.flip(mask_surface, False, True))
+    mask_fx_fy = pygame.mask.from_surface(pygame.transform.flip(mask_surface, True, True))
+    return [[mask, mask_fy], [mask_fx, mask_fx_fy]]
