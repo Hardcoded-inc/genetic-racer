@@ -38,10 +38,10 @@ class Car:
     def decelerate(self):
         self.vel = max(self.vel - self.deceleration_rate, 0)
 
-    def turn_left():
+    def turn_left(self):
             self.angle += self.steering
 
-    def turn_right():
+    def turn_right(self):
             self.angle -= self.steering
 
 
@@ -75,9 +75,9 @@ class Car:
             self.decelerate()
 
         if keys[pygame.K_LEFT]:
-            turn_left()
+            self.turn_left()
         elif keys[pygame.K_RIGHT]:
-            turn_right()
+            self.turn_right()
 
         self.move()
 
