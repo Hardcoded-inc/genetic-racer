@@ -1,24 +1,28 @@
-from utils import sigmoid, relu, sigmoid_backward, relu_backward
+from utils import sigmoid, relu, sigmoid_backward, relu_backward, convert_prob_into_class
 import numpy as np
 
 DEFAULT_SEED = 99
-DEFAULT_EPOCHS = 10
-DEFAULT_LEARNING_RATE = 10
+DEFAULT_EPOCHS = 10000
+DEFAULT_LEARNING_RATE = 0.01
 DEFAULT_NN_ARCHITECTURE = [
-            {"input_dim": 2, "output_dim": 4, "activation": "relu"},
-            {"input_dim": 4, "output_dim": 6, "activation": "relu"},
-            {"input_dim": 6, "output_dim": 6, "activation": "relu"},
-            {"input_dim": 6, "output_dim": 4, "activation": "relu"},
-            {"input_dim": 4, "output_dim": 1, "activation": "sigmoid"},
-        ]
+    {"input_dim": 2, "output_dim": 25, "activation": "relu"},
+    {"input_dim": 25, "output_dim": 50, "activation": "relu"},
+    {"input_dim": 50, "output_dim": 50, "activation": "relu"},
+    {"input_dim": 50, "output_dim": 25, "activation": "relu"},
+    {"input_dim": 25, "output_dim": 1, "activation": "sigmoid"},
+]
 
 class NeuralNetwork:
     def __init__(self):
+        self.verbose = True
+        self.callback = None
+
         self.seed = DEFAULT_SEED
         self.nn_architecture = DEFAULT_NN_ARCHITECTURE
 
         self.cost_history = []
         self.accuracy_history = []
+        self.params_values = {}
 
         self.X = None
         self.Y = None
@@ -29,6 +33,7 @@ class NeuralNetwork:
 
 
     def single_layer_forward_propagation(self, A_prev, W_curr, b_curr, activation="relu"):
+        # calculation of the input value for the activation function
         Z_curr = np.dot(W_curr, A_prev) + b_curr
 
         if activation == "relu":
@@ -38,6 +43,7 @@ class NeuralNetwork:
         else:
             raise Exception('Non-supported activation function')
 
+        # return of calculated activation A and the intermediate Z matrix
         return activation_func(Z_curr), Z_curr
 
 
@@ -134,7 +140,7 @@ class NeuralNetwork:
 
 
     def update(self, grads_values):
-        for layer_idx, layer in enumerate(self.nn_architecture):
+        for layer_idx, layer in enumerate(self.nn_architecture, 1):
             self.params_values["W" + str(layer_idx)] -= self.learning_rate * grads_values["dW" + str(layer_idx)]
             self.params_values["b" + str(layer_idx)] -= self.learning_rate * grads_values["db" + str(layer_idx)]
 
@@ -158,28 +164,60 @@ class NeuralNetwork:
 
 
         for i in range(self.epochs):
+            # step forward
             Y_hat, cashe = self.full_forward_propagation()
+
+            # calculating metrics and saving them in history
             cost = self.get_cost_value(Y_hat)
             self.cost_history.append(cost)
 
             accuracy = self.get_accuracy_value(Y_hat)
             self.accuracy_history.append(accuracy)
 
+            # step backward - calculating gradient
             grads_values = self.full_backward_propagation(Y_hat, cashe)
+
+            # updating model state
             self.update(grads_values)
+
+            if(i % 50 == 0):
+                if(self.verbose):
+                    print("Iteration: {:05} - cost: {:.5f} - accuracy: {:.5f}".format(i, cost, accuracy))
+                if(self.callback != None):
+                    callback(i, params_values)
 
         # return self.params_values, self.cost_history, self.accuracy_history
 
 
-nn = NeuralNetwork()
 
-nn.seed = 2
-nn.nn_architecture = DEFAULT_NN_ARCHITECTURE
-nn.init_layers()
 
-nn.X = None
-nn.Y = None
-
-res = nn.train()
+########################################
+##           Example usage            ##
+########################################
+#
+#
+# nn = NeuralNetwork()
+#
+# nn.seed = 2
+# nn.nn_architecture = DEFAULT_NN_ARCHITECTURE
+# nn.init_layers()
+#
+#
+#
+# from sklearn.datasets import make_moons
+# from sklearn.model_selection import train_test_split
+#
+# # number of samples in the data set
+# N_SAMPLES = 1000
+# # ratio between training and test sets
+# TEST_SIZE = 0.1
+#
+# X, y = make_moons(n_samples = N_SAMPLES, noise=0.2, random_state=100)
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE, random_state=42)
+#
+# nn.X = np.transpose(X_train)
+# nn.Y = np.transpose(y_train.reshape((y_train.shape[0], 1)))
+#
+# res = nn.train()
 
 

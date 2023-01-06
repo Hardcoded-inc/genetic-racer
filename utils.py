@@ -1,4 +1,5 @@
 import pygame
+import numpy as np
 
 def scale_image(img, factor):
     size = round(img.get_width() * factor), round(img.get_height() * factor)
@@ -11,10 +12,17 @@ def relu(Z):
     return np.maximum(0,Z)
 
 def sigmoid_backward(dA, Z):
-    sig = self.sigmoid(Z)
+    sig = sigmoid(Z)
     return dA * sig * (1 - sig)
 
 def relu_backward(dA, Z):
     dZ = np.array(dA, copy = True)
     dZ[Z <= 0] = 0;
     return dZ;
+
+# an auxiliary function that converts probability into class
+def convert_prob_into_class(probs):
+    probs_ = np.copy(probs)
+    probs_[probs_ > 0.5] = 1
+    probs_[probs_ <= 0.5] = 0
+    return probs_
