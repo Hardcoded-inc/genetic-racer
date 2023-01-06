@@ -14,6 +14,8 @@ if __name__ == "__main__":
         print("Started in AI Mode")
         game = Game(ai_mode=True, debug=debug)
         ql_agent = QLAgent(game)
+        ql_agent.pretrain()
+
 
     else:
         game = Game(debug=debug)

@@ -8,10 +8,9 @@ from utils import scale_image
 WIDTH, HEIGHT = (810, 810)
 FPS = 30
 
-
 class Game:
-    actions_count = 5
-    states_size = 11
+    actions_count = 9
+    states_size = 3
     frame_rate = FPS
 
     def __init__(self, ai_mode=False, debug=False):
@@ -33,14 +32,14 @@ class Game:
 
 
 
-    def run(self, step_callback):
+    def run(self, step_callback=None):
         # Main game loop
         running = True
         while running:
             if self.ai_mode:
-                step_callback()
+                running = step_callback()
             else:
-                self.clock.tick(FPS)
+                self.clock.tick(self.frame_rate)
 
             self.update()
             self.draw()

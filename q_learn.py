@@ -29,7 +29,7 @@ class QLAgent:
         self.batch_size = 64
         self.memory_size = 100000       # Number of experiences the ReplayMemory can keep
 
-        self.pretrain_length = 640       # Number of experiences collected before training
+        self.pretrain_length = 200       # Number of experiences collected before training
 
 
         # ------------------------ #
@@ -66,10 +66,6 @@ class QLAgent:
 
 
         print("QL Agent initilized")
-        print("Start pretraining...")
-        self.pretrain()
-
-        # self.update_target_network_params()
 
     def update_target_network_params(self):
         # Copy NN params from dq_n to target_n
@@ -78,6 +74,8 @@ class QLAgent:
 
 
     def pretrain(self):
+        print("Start pretraining...")
+
         state = []
         new_episode = False
         step = 0
@@ -110,11 +108,13 @@ class QLAgent:
                 self.replay_memory.store((state, action, reward, next_state, False))
                 state = next_state
 
-            self.game.clock.tick(30)
             step += 1
+            self.game.clock.tick()
+            return step < self.pretrain_length
 
 
         self.game.run(step_function)
+        self.update_target_network_params()
 
         print("Pre-Training finished!")
 
