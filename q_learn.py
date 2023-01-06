@@ -1,14 +1,15 @@
-from game import Game
 from neural_network import NeuralNetwork
+from collections import deque
+from time import sleep
+import numpy as np
 import math
-import numpy
 import random
 
 
 class QLearning:
     def __init__(self, game):
 
-        self.game = Game()
+        self.game = game
         self.game.new_episode()
 
 
@@ -30,7 +31,7 @@ class QLearning:
         self.batch_size = 64
         self.memory_size = 100000       # Number of experiences the ReplayMemory can keep
 
-        self.pretrain_length = 64       # Number of experiences collected before training
+        self.pretrain_length = 640       # Number of experiences collected before training
 
 
         # ------------------------ #
@@ -55,19 +56,17 @@ class QLearning:
         #        Setup NNs         #
         # ------------------------ #
         self.nn_architecture = [
-            {"input_dim": states_size, "output_dim": 256, "activation": "relu"},
-            {"input_dim": 256, "output_dim": 256, "activation": "relu"},
-            {"input_dim": 256, "output_dim": 256, "activation": "relu"},
-            {"input_dim": 256, "output_dim": 256, "activation": "relu"},
-            {"input_dim": 256, "output_dim": actions_size, "activation": "sigmoid"},
+            {"input_dim": self.states_size, "output_dim": 24, "activation": "relu"},
+            {"input_dim": 24, "output_dim": 24, "activation": "relu"},
+            {"input_dim": 24, "output_dim": self.actions_size, "activation": "sigmoid"},
         ]
 
         self.dq_network = NeuralNetwork(self.learning_rate, self.nn_architecture)
         self.target_network = NeuralNetwork(self.learning_rate, self.nn_architecture)
 
-        self.replay_memory = ReplaydMemory(self.memory_size)
+        self.replay_memory = ReplayMemory(self.memory_size)
 
-
+        sleep(1)
         self.pretrain()
         # self.update_target_network_params()
 
@@ -82,8 +81,9 @@ class QLearning:
         new_episode = False
 
 
-        for i in range(self.pretrain_length):
-            if i == 0:
+        for step in range(self.pretrain_length):
+            print(f"step {step}")
+            if step == 0:
                 state = self.game.get_state()
 
             # Pick a random movement and do it to populate the memory thing
@@ -111,7 +111,7 @@ class ReplayMemory:
     def __init__(self, max_size):
         self.buffer = deque(maxlen=max_size)
 
-    def add(self, experience):
+    def store(self, experience):
         self.buffer.append(experience)
 
     def sample(self, batch_size):

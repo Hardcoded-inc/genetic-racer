@@ -11,12 +11,13 @@ FPS = 30
 
 class Game:
     actions_count = 9
-    state_size = 11
+    states_size = 11
     frame_rate = FPS
 
-    def __init__(self, ai_mode=False):
+    def __init__(self, ai_mode=False, debug=False):
         pygame.init()
         self.ai_mode = ai_mode
+        self.debug = debug
 
         # Set the window size and title
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -46,7 +47,7 @@ class Game:
 
     def update(self):
         self.car.update()
-        print(self.car.distances)
+        if(self.debug): print(self.car.distances)
 
     def draw(self):
         # Draw the track and car
