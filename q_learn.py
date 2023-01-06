@@ -15,7 +15,7 @@ class QLearning:
         # ------------------------ #
         #       Model params       #
         # ------------------------ #
-        possible_actions = np.identity(game.actions_count, dtype=int)
+        self.possible_actions = np.identity(game.actions_count, dtype=int)
         self.states_size = [game.states_size]
         self.actions_size = game.actions_count
         self.learning_rate = 0.00025
@@ -52,7 +52,7 @@ class QLearning:
 
 
         # ------------------------ #
-        #          Setup           #
+        #        Setup NNs         #
         # ------------------------ #
         self.nn_architecture = [
             {"input_dim": states_size, "output_dim": 256, "activation": "relu"},
@@ -68,6 +68,43 @@ class QLearning:
         self.replay_memory = ReplaydMemory(self.memory_size)
 
 
+        self.pretrain()
+        # self.update_target_network_params()
+
+    def update_target_network_params(self):
+        # Copy NN params from dq_n to target_n
+        # self.dq_network -> self.target_network
+        pass
+
+
+    def pretrain(self):
+        state = []
+        new_episode = False
+
+
+        for i in range(self.pretrain_length):
+            if i == 0:
+                state = self.game.get_state()
+
+            # Pick a random movement and do it to populate the memory thing
+            action = random.choice(self.possible_actions)
+            action_no = np.argmax(action)
+
+            # Get next
+            reward = self.game.make_action(action_no)
+            next_state = self.game.get_state()
+
+            if self.game.is_episode_finished():
+                reward = -100
+                new_episode = True
+                self.replay_memory.store((state, action, reward, next_state, True))
+                self.game.new_episode()
+                state = self.game.get_state()
+            else:
+                self.replay_memory.store((state, action, reward, next_state, False))
+                state = next_state
+
+        print("Pre-Training finished!")
 
 
 class ReplayMemory:
