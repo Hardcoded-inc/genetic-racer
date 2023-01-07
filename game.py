@@ -3,7 +3,6 @@ import pygame
 import numpy as np
 from car import Car
 from track import Track
-from gate import Gate
 from utils import scale_image
 
 WIDTH, HEIGHT = (810, 810)
@@ -11,7 +10,7 @@ FPS = 30
 
 class Game:
     actions_count = 9
-    states_size = 4
+    state_size = 18
     frame_rate = FPS
 
     def __init__(self, ai_mode=False, debug=False):
@@ -29,27 +28,34 @@ class Game:
         # Create the track and car
         self.track = Track(self.screen)
         self.car = Car(self.screen, self.track)
-        self.currentGate = Gate(self.screen, self.car)
 
 
-
-    def run(self, step_callback=None):
+    def run_for_agent(self, step_callback):
         # Main game loop
         running = True
         while running:
-            if self.ai_mode:
-                running = step_callback()
-            else:
-                self.clock.tick(self.frame_rate)
+            running = step_callback()
+            self.clock.tick()
+            self.update()
+            self.draw()
 
+
+    def run(self):
+        # Main game loop
+        running = True
+        while running:
+
+            self.clock.tick(self.frame_rate)
             self.update()
             self.draw()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-        pygame.quit()
-        exit(0)
+
+        # pygame.quit()
+        # exit(0)
+
 
     def update(self):
         if(self.debug): self.show_debug_board()
@@ -62,26 +68,19 @@ class Game:
         print(f"Car state: \n{self.car.get_state()}\n")
 
     def draw(self):
-        # Draw the track and car
+        # Draw the track, car and gate
         self.track.draw()
         self.car.draw()
 
-        if self.car.collide(self.currentGate.gate_mask) is not None:
-            # add points
-
-            # initialize next gate
-            self.currentGate = Gate(self.screen, self.car, self.currentGate)
-
+        if(self.debug):
+            self.car.gate.draw()
 
         if self.car.collide(self.track.track_border_mask) is not None:
             if(self.ai_mode):
                 self.car.kill()
             else:
                 self.car.reset()
-                self.currentGate = Gate(self.screen, self.car)
-            
 
-        self.currentGate.draw()
 
         # Update the display
         pygame.display.flip()
@@ -92,7 +91,6 @@ class Game:
 
     def new_episode(self):
         self.car.reset()
-        self.currentGate = Gate(self.screen, self.car)
 
     def get_state(self):
         return self.car.get_state()

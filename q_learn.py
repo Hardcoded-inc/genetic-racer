@@ -15,7 +15,7 @@ class QLAgent:
         #       Model params       #
         # ------------------------ #
         self.possible_actions = np.identity(game.actions_count, dtype=int)
-        self.states_size = [game.states_size]
+        self.state_size = [game.state_size]
         self.actions_size = game.actions_count
         self.learning_rate = 0.00025
 
@@ -29,7 +29,7 @@ class QLAgent:
         self.batch_size = 64
         self.memory_size = 100000       # Number of experiences the ReplayMemory can keep
 
-        self.pretrain_length = 200      # Number of experiences collected before training
+        self.pretrain_length = 50      # Number of experiences collected before training
 
 
         # ------------------------ #
@@ -54,7 +54,7 @@ class QLAgent:
         #        Setup NNs         #
         # ------------------------ #
         self.nn_architecture = [
-            {"input_dim": self.states_size, "output_dim": 24, "activation": "relu"},
+            {"input_dim": self.state_size, "output_dim": 24, "activation": "relu"},
             {"input_dim": 24, "output_dim": 24, "activation": "relu"},
             {"input_dim": 24, "output_dim": self.actions_size, "activation": "sigmoid"},
         ]
@@ -113,7 +113,7 @@ class QLAgent:
             return step < self.pretrain_length
 
 
-        self.game.run(step_function)
+        self.game.run_for_agent(step_function)
         self.update_target_network_params()
 
         print("Pre-Training finished!")

@@ -1,7 +1,9 @@
 import pygame
-from utils import scale_image
+from utils import scale_image, flip_surface
+
 
 GATES_AMOUNT = 27
+RAY_LEN = 560
 
 
 class Gate:
@@ -14,9 +16,11 @@ class Gate:
         self.screen = screen
 
         self.gate = scale_image(pygame.image.load("img/gates/{}.png".format(self.index)), 0.9)
-        self.gate_mask = pygame.mask.from_surface(self.gate)
+        self.mask = pygame.mask.from_surface(self.gate)
 
-        car.update_current_gate(self)
+
+        self.beam_surface = pygame.Surface((RAY_LEN, RAY_LEN), pygame.SRCALPHA)
+        self.flipped_masks = flip_surface(self.gate)
 
     def draw(self):
         self.screen.blit(self.gate, (0, 0))

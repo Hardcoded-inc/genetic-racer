@@ -1,7 +1,8 @@
 import pygame
 import math
-from utils import scale_image, flip_surface
 import numpy as np
+from utils import scale_image, flip_surface
+from gate import Gate
 
 
 START_POSITION = (180, 200)
@@ -44,9 +45,8 @@ class Car:
         self.beam_surface = pygame.Surface((RAY_LEN, RAY_LEN), pygame.SRCALPHA)
         self.flipped_masks = flip_surface(track.track_border)
 
-        self.current_gate = None
-        self.gate_beam_surface = None
-        self.gate_flipped_masks = None
+        self.gate = Gate(self.screen, self)
+
 
     def kill(self):
         self.dead = True
@@ -86,6 +86,8 @@ class Car:
         self.rect.center = START_POSITION
         self.angle = START_ANGLE
         self.dead = False
+        self.gate = Gate(self.screen, self)
+
 
     def update_with_action(self, action_no):
         if action_no == 0:
@@ -116,9 +118,7 @@ class Car:
         if not self.dead:
             self.lifespan += 1
             self.move()
-
-            # TODO: check_rewars_gates()
-            # reward = self.check_reward_gates()
+            reward = self.check_reward_gates()
 
         return reward
 
@@ -138,6 +138,7 @@ class Car:
         elif keys[pygame.K_RIGHT]:
             self.turn_right()
 
+        self.check_reward_gates()
         self.move()
 
     def draw(self):
@@ -154,16 +155,21 @@ class Car:
             # Draw the rotated image
             self.screen.blit(rotated_image, rotated_rect)
 
-            self.wall_beam_distances = self.draw_beams(self.flipped_masks, self.gate_beam_surface, BLUE)
+            self.wall_beam_distances = self.draw_beams(self.flipped_masks, self.beam_surface, BLUE)
 
-            if self.current_gate is not None:
-                self.gate_beam_distances = self.draw_beams(self.gate_flipped_masks, self.gate_beam_surface, RED)
+            if self.gate is not None:
+                self.gate_beam_distances = self.draw_beams(self.gate.flipped_masks, self.gate.beam_surface, RED)
 
-    def update_current_gate(self, gate):
-        self.current_gate = gate
 
-        self.gate_beam_surface = pygame.Surface((RAY_LEN, RAY_LEN), pygame.SRCALPHA)
-        self.gate_flipped_masks = flip_surface(gate.gate)
+    def check_reward_gates(self):
+
+        if self.collide(self.gate.mask) is not None:
+            # add points
+            print("add award!")
+
+            # initialize next gate
+            self.gate = Gate(self.screen, self, self.gate)
+
 
     def draw_beams(self, flipped_masks, beam_surface, color):
         distances = []
@@ -211,7 +217,7 @@ class Car:
             else: normalized_wall_beams.append(1 - (max(1.0, beam) / max_ray_length))
 
         normalized_gate_beams = []
-        for beam in self.wall_beam_distances:
+        for beam in self.gate_beam_distances:
             if(beam == None): normalized_gate_beams.append(0)
             else: normalized_gate_beams.append(1 - (max(1.0, beam) / max_ray_length))
 
