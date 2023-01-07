@@ -49,6 +49,7 @@ class Game:
                 if event.type == pygame.QUIT:
                     running = False
         pygame.quit()
+        exit(0)
 
     def update(self):
         if(self.debug): self.show_debug_board()
@@ -78,6 +79,7 @@ class Game:
             else:
                 self.car.reset()
                 self.currentGate = Gate(self.screen, self.car)
+            
 
         self.currentGate.draw()
 
