@@ -259,7 +259,7 @@ class Car:
         normalized_velocity = max(0.0, self.vel / self.max_vel)
         normalized_angle = max(0.0, (self.angle / 359))
 
-        normalized_state = [*normalized_wall_beams, *normalized_gate_indicators, normalized_velocity, normalized_angle]
+        normalized_state = [*normalized_wall_beams, *normalized_gate_beams, normalized_velocity, normalized_angle]
         return np.array(normalized_state)
 
 
