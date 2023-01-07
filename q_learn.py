@@ -71,7 +71,7 @@ class QLAgent:
         print("QL Agent initilized")
 
     def update_target_network_params(self):
-        # Copy NN params from dq_n to target_n
+        # Copy NN params from DQ-Network to Target Network
             buff = getattr(self.dq_network, "params_values")
             setattr(self.target_network, "params_values", buff)
 
@@ -138,9 +138,10 @@ class QLAgent:
             if training_step == 0:
                 state = self.game.get_state()
 
-            if episode_no % 25 == 0 and episode_no != 0:
-                percentage = episode_no / self.total_episodes * 100
-                print(f"[Training] Episode: {episode_no}, {percentage}%")
+                if episode_no % 25 == 0 and episode_no != 0:
+                    percentage = episode_no / self.total_episodes * 100
+                    print(f"[Training] Episode: {episode_no}, {percentage}%")
+
 
             if step < self.max_steps:
                 step += 1
