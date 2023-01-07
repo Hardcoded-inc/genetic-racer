@@ -51,10 +51,14 @@ class Game:
         pygame.quit()
 
     def update(self):
+        if(self.debug): self.show_debug_board()
         self.car.update()
-        if(self.debug):
-            print("border distances: ", self.car.distances)
-            print("Gate distances: ", self.car.gate_distances)
+
+    def show_debug_board(self):
+        os.system('clear')
+        print(f"Border distances: \n{self.car.wall_beam_distances} \n")
+        print(f"Gate distances: \n{self.car.gate_beam_distances} \n")
+        print(f"Car state: \n{self.car.get_state()}\n")
 
     def draw(self):
         # Draw the track and car
