@@ -18,7 +18,6 @@ class Gate:
         self.gate = scale_image(pygame.image.load("img/gates/{}.png".format(self.index)), 0.9)
         self.mask = pygame.mask.from_surface(self.gate)
 
-
         self.beam_surface = pygame.Surface((RAY_LEN, RAY_LEN), pygame.SRCALPHA)
         self.flipped_masks = flip_surface(self.gate)
 

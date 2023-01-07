@@ -13,21 +13,24 @@ class Game:
     state_size = 18
     frame_rate = FPS
 
-    def __init__(self, ai_mode=False, debug=False):
+    def __init__(self, ai_mode=False, debug=False, eagle_vision=False):
         pygame.init()
         self.ai_mode = ai_mode
         self.debug = debug
+        self.eagle_vision = eagle_vision
 
         # Set the window size and title
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("Genetic Racer")
+        self.bg = pygame.Surface((WIDTH, HEIGHT))
+        self.bg.fill((0, 0, 0))
 
         # Set the clock to control the frame rate
         self.clock = pygame.time.Clock()
 
         # Create the track and car
         self.track = Track(self.screen)
-        self.car = Car(self.screen, self.track)
+        self.car = Car(self.screen, self.track, self.debug, self.eagle_vision)
 
 
     def run_for_agent(self, step_callback):
@@ -69,11 +72,10 @@ class Game:
 
     def draw(self):
         # Draw the track, car and gate
-        self.track.draw()
+        self.screen.blit(self.bg, (0, 0))
+        if(self.debug): self.car.gate.draw()
+        if(not self.eagle_vision): self.track.draw()
         self.car.draw()
-
-        if(self.debug):
-            self.car.gate.draw()
 
         if self.car.collide(self.track.track_border_mask) is not None:
             if(self.ai_mode):

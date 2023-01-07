@@ -69,9 +69,9 @@ class QLAgent:
 
     def update_target_network_params(self):
         # Copy NN params from dq_n to target_n
-        # self.dq_network -> self.target_network
-        pass
-
+        for fieldname in ["cost_history", "accuracy_history", "params_values"]:
+            buff = getattr(dq_network, fieldname)
+            setattr(target_network, fieldname, buff)
 
     def pretrain(self):
         print("Start pretraining...")

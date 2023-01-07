@@ -13,9 +13,11 @@ BLUE = (0, 0, 255)
 RAY_LEN = 560
 
 class Car:
-    def __init__(self, screen, track):
+    def __init__(self, screen, track, debug, eagle_vision):
         self.screen = screen
         self.track = track
+        self.debug = debug
+        self.eagle_vision = eagle_vision
 
         # Set the car's starting position and angle
         image = pygame.image.load("img/car.png")
@@ -192,7 +194,9 @@ class Car:
 
         beam_surface.fill((0, 0, 0, 0))
 
-        pygame.draw.line(beam_surface, color, (405, 405), (x_dest, y_dest))
+        if self.debug or self.eagle_vision:
+            pygame.draw.line(beam_surface, color, (405, 405), (x_dest, y_dest))
+
         beam_mask = pygame.mask.from_surface(beam_surface)
 
         offset_x = 405 - pos[0] if flip_x else pos[0] - 405
