@@ -31,7 +31,6 @@ class Car:
         self.vel = 0
         self.angle = START_ANGLE
         self.dead = False
-        self.reward = 0
         self.score = 0
         self.lifespan = 0
         self.wall_beam_distances = []
@@ -164,13 +163,13 @@ class Car:
 
 
     def check_reward_gates(self):
-
         if self.collide(self.gate.mask) is not None:
-            # add points
-            print("add award!")
-
+            self.score += 1
             # initialize next gate
             self.gate = Gate(self.screen, self, self.gate)
+            # return reward
+            return self.gate.reward_val
+
 
 
     def draw_beams(self, flipped_masks, beam_surface, color):

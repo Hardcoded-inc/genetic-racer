@@ -5,9 +5,12 @@ from utils import scale_image, flip_surface
 GATES_AMOUNT = 27
 RAY_LEN = 560
 
+REWARD_VAL = 10
 
 class Gate:
     def __init__(self, screen, car, prev_gate=None):
+        self.reward_val = REWARD_VAL
+
         if prev_gate is None or prev_gate.index == GATES_AMOUNT:
             self.index = 1
         else:

@@ -4,6 +4,7 @@ from time import sleep
 import numpy as np
 import math
 import random
+import os
 
 class QLAgent:
     def __init__(self, game):
@@ -31,6 +32,8 @@ class QLAgent:
 
         self.pretrain_length = 50      # Number of experiences collected before training
 
+        self.autosave_freq = 1000
+        self.save_dir_path = "./models"
 
         # ------------------------ #
         #     Q-learning params    #
@@ -115,6 +118,105 @@ class QLAgent:
 
         self.game.run_for_agent(step_function)
         self.update_target_network_params()
+        print("Pre-Training finished!")
+
+
+
+
+    def train(self):
+        tau = 0
+        state = []
+        step_no = 0
+        training_step_no = 0
+        episode_no = 0
+        new_episode = False
+
+        def step_function():
+            if training_step_no == 0:
+                state = self.game.get_state()
+
+            if new_episode:
+                state = self.game.get_state()
+
+            if step_no < self.max_steps:
+                step_no += 1
+                self.decay_step += 1
+                training_step_no += 1
+                tau += 1
+
+                # choose best action if not exploring choose random otherwise
+
+                epsilon = self.min_epsilon + (self.max_epsilon - self.min_epsilon) * np.exp(
+                    -self.decay_rate * self.decay_step)
+
+                if np.random.rand() < epsilon:
+                    choice = random.randint(1, len(self.possible_actions)) - 1
+                    action = self.possible_actions[choice]
+
+                else:
+                    # TODO
+                    q_values = self.sess.run(self.dq_network.output,
+                                            feed_dict={self.dq_network.inputs_: np.array([state])})
+                    choice = np.argmax(q_values)
+                    action = self.possible_actions[choice]
+
+                action_no = np.argmax(action)
+                # now we need to get next state
+                reward = self.game.make_action(action_no)
+
+                next_state = self.game.get_state()
+
+                if (reward > 0):
+                    print(f"Hell YEAH, Reward = {reward}")
+                # if car is dead then finish episode
+                if self.game.is_episode_finished():
+                    reward = -100
+                    step_no = self.max_steps
+                    print("DEAD!! Reward =  -100")
+
+                # print("Episode {} Step {} Action {} reward {} epsilon {} experiences stored {}"
+                #       .format(episode_no, step_no, action_no, reward, epsilon, training_step_no))
+
+                # add the experience to the memory buffer
+                self.replay_memory.store((state, action, reward, next_state, self.game.is_episode_finished()))
+
+                state = next_state
+
+
+            if tau > self.max_tau:
+                self.update_target_network_params()
+                print("Target Network Updated")
+                tau = 0
+
+            if step_no >= self.max_steps:
+                episode_no += 1
+                step_no = 0
+                new_episode = True
+                self.game.new_episode()
+                if episode_no >= self.total_episodes:
+                    self.training = False
+
+                if episode_no % self.autosave_freq == 0:
+                    self.save_model()
+                    print("Model Saved")
+
+            self.game.clock.tick()
+
+
+        self.game.run_for_agent(step_function)
+        print("Training finished!")
+
+
+def save_model(self):
+    directory = f"{self.save_dir_path}/model{episode_no}"
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    # TODO
+    # What to save?
+    # self.target_network.params_values
+    # save(f"{self.save_dir_path}/model{episode_no}/model.ckpt")
+
 
         print("Pre-Training finished!")
 

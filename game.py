@@ -98,8 +98,7 @@ class Game:
         return self.car.get_state()
 
     def make_action(self, action_no):
-        self.car.update_with_action(action_no)
-        return self.car.reward
+        return self.car.update_with_action(action_no)
 
     def is_episode_finished(self):
         return self.car.dead
