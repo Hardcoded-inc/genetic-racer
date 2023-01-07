@@ -189,7 +189,8 @@ class QLAgent:
                 # Learning!
                 # first we are gonna need to grab a random batch of experiences from out memory
 
-                replay_memory_samples = self.replay_memory.sample(self.batch_size)
+                replay_memory_samples = np.array(self.replay_memory.sample(self.batch_size), dtype=object)
+
                 exp = np.transpose(replay_memory_samples)
 
                 states_batch = exp[0]
@@ -317,4 +318,3 @@ class ReplayMemory:
                                  size=batch_size,
                                  replace=False)
         return [self.buffer[i] for i in index]
-
