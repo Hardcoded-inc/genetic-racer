@@ -138,8 +138,9 @@ class QLAgent:
             if training_step == 0:
                 state = self.game.get_state()
 
-            if episode_no % 25 == 0:
-            print(f"[Training] Episode: {episode_no}, {episode_no/self.total_episodes * 100}%")
+            if episode_no % 25 == 0 and episode_no != 0:
+                percentage = episode_no / self.total_episodes * 100
+                print(f"[Training] Episode: {episode_no}, {percentage}%")
 
             if step < self.max_steps:
                 step += 1
@@ -256,6 +257,7 @@ class QLAgent:
                 self.replay_memory.store((state, action, reward, next_state, True))
 
                 step = 0
+                episode_no += 1
                 self.game.new_episode()
                 state = self.game.get_state()
 
@@ -283,10 +285,8 @@ class QLAgent:
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        # TODO
-        # What to save?
-        # self.target_network.params_values
-        # save(f"{self.save_dir_path}/model{episode_no}/model.ckpt")
+        with open(f"{self.save_dir_path}/model{episode_no}/model.ckpt", 'w') as model_file:
+            model_file.write(str(self.dq_network.params_values))
 
 
 
