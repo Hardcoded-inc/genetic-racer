@@ -32,7 +32,7 @@ class QLAgent:
 
         self.pretrain_length = 10 * self.batch_size      # Number of experiences collected before training
 
-        self.autosave_freq = 100
+        self.autosave_freq = 500
         self.save_dir_path = "./models"
 
         # ------------------------ #
@@ -204,15 +204,15 @@ class QLAgent:
 
                 # compute q values for current state of each experience in the batch
 
-                computing_input_data = np.transpose(np.stack(states_batch, axis=0))
-                action_q_values_current_state = self.dq_network.full_forward_propagation(computing_input_data)
+                input_data = np.transpose(np.stack(states_batch, axis=0))
+                action_q_values_current_state = self.dq_network.full_forward_propagation(input_data)
                 action_q_values_current_state = np.transpose(action_q_values_current_state)
 
 
                 # predict the q values of the next state for each experience in the batch
 
-                computing_input_data = np.transpose(np.stack(next_states_batch, axis=0))
-                action_q_values_next_states = self.target_network.full_forward_propagation(computing_input_data)
+                input_data = np.transpose(np.stack(next_states_batch, axis=0))
+                action_q_values_next_states = self.target_network.full_forward_propagation(input_data)
                 action_q_values_next_states = np.transpose(action_q_values_next_states)
 
 
@@ -228,10 +228,6 @@ class QLAgent:
 
                 targets_for_batch = np.array([t for t in target_qs_from_batch])
 
-
-                # TODO: What about the loss function?
-                # loss = self.mse_loss(actions_batch, target_qs_from_batch)
-
                 output_q_values = []
                 for i in range(self.batch_size):
                     action_no = np.argmax(actions_batch[i])
@@ -239,8 +235,12 @@ class QLAgent:
                     output_q_values.append(value)
 
 
+                # TODO: What about the loss function?
+                # loss = self.mse_loss(targets_for_batch, output_q_values)
+                # loss = (targets_for_batch - output_q_values)^2
+
                 # step backward - calculating gradient
-                grads_values = self.dq_network.full_backward_propagation(np.array([output_q_values]), np.array([targets_for_batch]))
+                grads_values = self.dq_network.full_backward_propagation(np.array([targets_for_batch]), np.array([output_q_values]))
 #
                 # updating model state
                 self.dq_network.update(grads_values)
