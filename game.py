@@ -9,9 +9,8 @@ WIDTH, HEIGHT = (810, 810)
 FPS = 30
 
 class Game:
-    actions_count = 9
+    actions_count = 7
     state_size = 18
-    frame_rate = FPS
 
     def __init__(self, ai_mode=False, debug=False, eagle_vision=False):
         pygame.init()
@@ -47,7 +46,7 @@ class Game:
         running = True
         while running:
 
-            self.clock.tick(self.frame_rate)
+            self.clock.tick(FPS)
             self.update()
             self.draw()
 

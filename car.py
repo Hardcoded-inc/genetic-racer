@@ -113,12 +113,6 @@ class Car:
         elif action_no == 5:
             self.decelerate()
         elif action_no == 6:
-            self.turn_left()
-            self.decelerate()
-        elif action_no == 7:
-            self.turn_right()
-            self.decelerate()
-        elif action_no == 8:
             pass
 
         reward = 0

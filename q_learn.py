@@ -27,10 +27,10 @@ class QLAgent:
         self.max_steps = 5000           # for episode
         self.max_tau = 10000            # Tau is the step where we update our target network
 
-        self.batch_size = 200
+        self.batch_size = 64
         self.memory_size = 100000       # Number of experiences the ReplayMemory can keep
 
-        self.pretrain_length = self.batch_size      # Number of experiences collected before training
+        self.pretrain_length = 10 * self.batch_size      # Number of experiences collected before training
 
         self.autosave_freq = 100
         self.save_dir_path = "./models"
