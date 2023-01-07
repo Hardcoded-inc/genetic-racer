@@ -37,10 +37,9 @@ class Game:
         # Main game loop
         running = True
         while running:
-            running = step_callback()
-            self.clock.tick()
             self.update()
             self.draw()
+            running = step_callback()
 
 
     def run(self):

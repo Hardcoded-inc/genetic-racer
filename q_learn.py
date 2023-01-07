@@ -30,7 +30,7 @@ class QLAgent:
         self.batch_size = 64
         self.memory_size = 100000       # Number of experiences the ReplayMemory can keep
 
-        self.pretrain_length = 64      # Number of experiences collected before training
+        self.pretrain_length = self.batch_size      # Number of experiences collected before training
 
         self.autosave_freq = 1000
         self.save_dir_path = "./models"
@@ -72,9 +72,8 @@ class QLAgent:
 
     def update_target_network_params(self):
         # Copy NN params from dq_n to target_n
-        for fieldname in ["cost_history", "accuracy_history", "params_values"]:
-            buff = getattr(self.dq_network, fieldname)
-            setattr(self.target_network, fieldname, buff)
+            buff = getattr(self.dq_network, "params_values")
+            setattr(self.target_network, "params_values", buff)
 
     def pretrain(self):
         print("Start pretraining...")
@@ -89,7 +88,7 @@ class QLAgent:
             nonlocal state
             nonlocal new_episode
 
-            print(f"[Pre-Trainingraining] Step {step}")
+            print(f"[Pre-Training] Step {step}")
             if step == 0:
                 state = self.game.get_state()
 
@@ -131,8 +130,6 @@ class QLAgent:
         episode_no = 0
         new_episode = False
 
-        self.game.new_episode()
-
         def step_function():
             nonlocal tau
             nonlocal state
@@ -160,18 +157,17 @@ class QLAgent:
                 epsilon = self.min_epsilon + (self.max_epsilon - self.min_epsilon) * np.exp(
                     -self.decay_rate * self.decay_step)
 
-                # if np.random.rand() < epsilon:
-                if False:
-                    choice = random.randint(1, len(self.possible_actions)) - 1
-                    action = self.possible_actions[choice]
+                action = None
+                if np.random.rand() < epsilon:
+                    action = random.choice(self.possible_actions)
+                    action_no = np.argmax(action)
 
                 else:
-                    (q_values, _memory) = self.dq_network.full_forward_propagation(np.transpose(np.array([state])))
+                    computing_input_data = np.transpose(np.array([state]))
+                    action_q_values = self.dq_network.full_forward_propagation(computing_input_data)
+                    action = acaction_q_values
+                    action_no = np.argmax(action)
 
-                    choice = np.argmax(q_values)
-                    action = self.possible_actions[choice]
-
-                action_no = np.argmax(action)
                 # now we need to get next state
                 reward = self.game.make_action(action_no)
 
@@ -193,23 +189,90 @@ class QLAgent:
 
                 state = next_state
 
+                # ---------
+                # Learning!
+                # first we are gonna need to grab a random batch of experiences from out memory
+
+                replay_memory_samples = self.replay_memory.sample(self.batch_size)
+                exp = np.transpose(replay_memory_samples)
+
+                states_batch = exp[0]
+                actions_batch = exp[1]
+                rewards_batch = exp[2]
+                next_states_batch = exp[3]
+                dies_batch = exp[4]
+
+                target_qs_from_batch = []
+
+
+                # compute q values for current state of each experience in the batch
+
+                computing_input_data = np.transpose(np.stack(states_batch, axis=0))
+                action_q_values_current_state = self.dq_network.full_forward_propagation(computing_input_data)
+                action_q_values_current_state = np.transpose(action_q_values_current_state)
+
+
+                # predict the q values of the next state for each experience in the batch
+
+                computing_input_data = np.transpose(np.stack(next_states_batch, axis=0))
+                action_q_values_next_states = self.target_network.full_forward_propagation(computing_input_data)
+                action_q_values_next_states = np.transpose(action_q_values_next_states)
+
+
+                for i in range(self.batch_size):
+                    action_no = np.argmax(action_q_values_next_states[i])  # double DQN
+                    terminal_state = dies_batch[i]
+                    if terminal_state:
+                        target_qs_from_batch.append(rewards_batch[i])
+                    else:
+                        # The Bellman equation
+                        target = rewards_batch[i] + self.gamma * action_q_values_next_states[i][action_no]  # double DQN
+                        target_qs_from_batch.append(target)
+
+                targets_for_batch = np.array([t for t in target_qs_from_batch])
+
+
+                # TODO: What about the loss function?
+                # loss = self.mse_loss(actions_batch, target_qs_from_batch)
+
+                output_q_values = []
+                for i in range(self.batch_size):
+                    action_no = np.argmax(actions_batch[i])
+                    value = action_q_values_current_state[i][action_no]
+                    output_q_values.append(value)
+
+
+                # step backward - calculating gradient
+                grads_values = self.dq_network.full_backward_propagation(np.array([output_q_values]), np.array([targets_for_batch]))
+#
+                # updating model state
+                self.dq_network.update(grads_values)
+
 
             if tau > self.max_tau:
                 self.update_target_network_params()
                 print("Target Network Updated")
                 tau = 0
 
-            if step >= self.max_steps:
-                episode_no += 1
-                step = 0
+
+            if self.game.is_episode_finished() or step >= self.max_steps:
+                reward = -100
                 new_episode = True
+                self.replay_memory.store((state, action, reward, next_state, True))
+
+                step = 0
                 self.game.new_episode()
+                state = self.game.get_state()
+
                 if episode_no >= self.total_episodes:
                     self.training = False
 
                 if episode_no % self.autosave_freq == 0:
                     self.save_model()
                     print("Model Saved")
+            else:
+                self.replay_memory.store((state, action, reward, next_state, False))
+                state = next_state
 
             self.game.clock.tick()
 
@@ -229,7 +292,22 @@ def save_model(self):
     # save(f"{self.save_dir_path}/model{episode_no}/model.ckpt")
 
 
-        print("Pre-Training finished!")
+
+#     def test(self):
+#
+#         state = self.game.get_state()
+#
+#         QValues = self.sess.run(self.dq_network.output,
+#                                 feed_dict={self.dq_network.inputs_: np.array([state])})
+#         choice = np.argmax(QValues)
+#         action = self.possible_actions[choice]
+#
+#         action_no = np.argmax(action)
+#         # now we need to get next state
+#         self.game.make_action(action_no)
+#
+#         if self.game.is_episode_finished():
+#             self.game.new_episode()
 
 
 class ReplayMemory:

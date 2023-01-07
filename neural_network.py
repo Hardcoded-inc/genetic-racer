@@ -20,9 +20,8 @@ class NeuralNetwork:
         self.seed = DEFAULT_SEED
         self.nn_architecture = nn_architecture
 
-        self.cost_history = []
-        self.accuracy_history = []
         self.params_values = {}
+        self.memory = {}
 
         self.X = None
         self.Y = None
@@ -51,7 +50,7 @@ class NeuralNetwork:
 
 
     def full_forward_propagation(self, X):
-        memory = {}
+        self.memory = {}
         A_curr = X
 
         for idx, layer in enumerate(self.nn_architecture):
@@ -63,28 +62,46 @@ class NeuralNetwork:
             b_curr = self.params_values["b" + str(layer_idx)]
             A_curr, Z_curr = self.single_layer_forward_propagation(A_prev, W_curr, b_curr, activ_function_curr)
 
-            memory["A" + str(idx)] = A_prev
-            memory["Z" + str(layer_idx)] = Z_curr
-
-        return A_curr, memory
+            self.memory["A" + str(idx)] = A_prev
+            self.memory["Z" + str(layer_idx)] = Z_curr
 
 
+        return A_curr
 
-    def calculate_loss(self):
-        # To implement
-        # Calculate loss between output Q-values and target Q-values.
-        # Requires a second pass to the network for the next state
 
-        # (Can use second NN for the stbility of the optimization)
 
-        pass
+    def mse_loss(self, y_pred, y_true):
+        """
+        Computes the mean squared error loss.
 
+        Arguments:
+        - y_pred: list of length n
+            List containing the predicted output.
+        - y_true: list of length n
+            List containing the true output.
+
+        Returns:
+        - loss: float
+            Scalar value containing the MSE loss.
+        """
+        # Check that the input lists have the same length
+        if len(y_pred) != len(y_true):
+            raise ValueError("y_pred and y_true must have the same length")
+
+        # Compute the squared difference between the predicted output and the true output
+        squared_diff = [(y_pred[i] - y_true[i]) ** 2 for i in range(len(y_pred))]
+
+        # Compute the mean of the squared difference
+        loss = sum(squared_diff) / len(squared_diff)
+
+        return loss
 
 
     def get_cost_value(self, Y_hat):
         m = Y_hat.shape[1]
         cost = -1 / m * (np.dot(self.Y, np.log(Y_hat).T) + np.dot(1 - self.Y, np.log(1 - Y_hat).T))
         return np.squeeze(cost)
+
 
     def get_accuracy_value(self, Y_hat):
         Y_hat_ = convert_prob_into_class(Y_hat)
@@ -113,12 +130,13 @@ class NeuralNetwork:
 
 
 
-    def full_backward_propagation(self, Y_hat, memory):
+    def full_backward_propagation(self, Y, Y_hat):
         grads_values = {}
-        m = self.Y.shape[1]
-        self.Y = self.Y.reshape(Y_hat.shape)
 
-        dA_prev = - (np.divide(self.Y, Y_hat) - np.divide(1 - self.Y, 1 - Y_hat));
+        m = Y.shape[1]
+        Y = Y.reshape(Y_hat.shape)
+
+        dA_prev = - (np.divide(Y, Y_hat) - np.divide(1 - Y, 1 - Y_hat));
 
         for layer_idx_prev, layer in reversed(list(enumerate(self.nn_architecture))):
             layer_idx_curr = layer_idx_prev + 1
@@ -126,8 +144,8 @@ class NeuralNetwork:
 
             dA_curr = dA_prev
 
-            A_prev = memory["A" + str(layer_idx_prev)]
-            Z_curr = memory["Z" + str(layer_idx_curr)]
+            A_prev = self.memory["A" + str(layer_idx_prev)]
+            Z_curr = self.memory["Z" + str(layer_idx_curr)]
             W_curr = self.params_values["W" + str(layer_idx_curr)]
             b_curr = self.params_values["b" + str(layer_idx_curr)]
 
@@ -161,23 +179,16 @@ class NeuralNetwork:
                 layer_output_size, 1) * 0.1
 
     def train(self):
-        self.cost_history = []
-        self.accuracy_history = []
-
-
         for i in range(self.epochs):
             # step forward
             Y_hat, cashe = self.full_forward_propagation(self.X)
 
-            # calculating metrics and saving them in history
+            # calculating metrics
             cost = self.get_cost_value(Y_hat)
-            self.cost_history.append(cost)
-
             accuracy = self.get_accuracy_value(Y_hat)
-            self.accuracy_history.append(accuracy)
 
             # step backward - calculating gradient
-            grads_values = self.full_backward_propagation(Y_hat, cashe)
+            grads_values = self.full_backward_propagation(self.Y, Y_hat, cashe)
 
             # updating model state
             self.update(grads_values)
@@ -187,8 +198,6 @@ class NeuralNetwork:
                     print("Iteration: {:05} - cost: {:.5f} - accuracy: {:.5f}".format(i, cost, accuracy))
                 if(self.callback != None):
                     callback(i, params_values)
-
-        # return self.params_values, self.cost_history, self.accuracy_history
 
 
 
