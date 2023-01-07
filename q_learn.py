@@ -29,7 +29,7 @@ class QLAgent:
         self.batch_size = 64
         self.memory_size = 100000       # Number of experiences the ReplayMemory can keep
 
-        self.pretrain_length = 200       # Number of experiences collected before training
+        self.pretrain_length = 200      # Number of experiences collected before training
 
 
         # ------------------------ #

@@ -11,7 +11,6 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 RAY_LEN = 560
 
-
 class Car:
     def __init__(self, screen, track):
         self.screen = screen
@@ -32,7 +31,8 @@ class Car:
         self.reward = 0
         self.score = 0
         self.lifespan = 0
-        self.distances = []
+        self.wall_beam_distances = []
+        self.gate_beam_distances = []
 
         # Set the car's acceleration, deceleration, and steering
         self.max_vel = 20
@@ -42,11 +42,7 @@ class Car:
         self.steering = 10
 
         self.beam_surface = pygame.Surface((RAY_LEN, RAY_LEN), pygame.SRCALPHA)
-
         self.flipped_masks = flip_surface(track.track_border)
-
-        self.distances = []
-        self.gate_distances = []
 
         self.current_gate = None
         self.gate_beam_surface = None
@@ -54,7 +50,7 @@ class Car:
 
     def kill(self):
         self.dead = True
-        self.distances = list(np.zeros(self.beams_count))
+        self.wall_beam_distances = list(np.zeros(self.beams_count))
 
     def accelerate(self):
         self.vel = min(self.vel + self.acceleration_rate, self.max_vel)
@@ -158,12 +154,12 @@ class Car:
             # Draw the rotated image
             self.screen.blit(rotated_image, rotated_rect)
 
-            self.distances = self.draw_beams(self.flipped_masks, self.gate_beam_surface, BLUE)
+            self.wall_beam_distances = self.draw_beams(self.flipped_masks, self.gate_beam_surface, BLUE)
 
             if self.current_gate is not None:
-                self.gate_distances = self.draw_beams(self.gate_flipped_masks, self.gate_beam_surface, RED)
+                self.gate_beam_distances = self.draw_beams(self.gate_flipped_masks, self.gate_beam_surface, RED)
 
-    def update_currect_gate(self, gate):
+    def update_current_gate(self, gate):
         self.current_gate = gate
 
         self.gate_beam_surface = pygame.Surface((RAY_LEN, RAY_LEN), pygame.SRCALPHA)
@@ -175,6 +171,7 @@ class Car:
             dist = self.draw_beam(self.screen, angle, self.rect.center, flipped_masks, beam_surface, color)
             distances.append(dist)
         return distances
+
     def draw_beam(self, surface, angle, pos, flipped_masks, beam_surface, color):
         c = math.cos(math.radians(angle - self.angle))
         s = math.sin(math.radians(angle - self.angle))
@@ -204,38 +201,23 @@ class Car:
             return math.hypot(hit_pos[0] - pos[0], hit_pos[1] - pos[1])
 
     def get_state(self):
+        self.wall_beam_distances
+        self.gate_beam_distances
+        max_ray_length = 160
 
-        # TODO: normalization
-        # normalizedState = [*normalizedBeams, normalizedVelocity, normalizedAngleOfNextGate]
+        normalized_wall_beams = []
+        for beam in self.wall_beam_distances:
+            if(beam == None): normalized_wall_beams.append(0)
+            else: normalized_wall_beams.append(1 - (max(1.0, beam) / max_ray_length))
 
-        return [
-            self.vel,
-            self.angle,
-            self.distances,
-        ]
+        normalized_gate_beams = []
+        for beam in self.wall_beam_distances:
+            if(beam == None): normalized_gate_beams.append(0)
+            else: normalized_gate_beams.append(1 - (max(1.0, beam) / max_ray_length))
 
+        normalized_velocity = max(0.0, self.vel / self.max_vel)
+        normalized_angle = max(0.0, (self.angle + 180) / 360)
 
+        normalized_state = [*normalized_wall_beams, *normalized_gate_beams, normalized_velocity, normalized_angle]
+        return np.array(normalized_state)
 
-#
-#     def normalize(self):
-#         self.setVisionVectors()
-#         normalizedVisionVectors = [1 - (max(1.0, line) / self.vectorLength) for line in self.collisionLineDistances]
-#
-#         normalizedForwardVelocity = max(0.0, self.vel / self.maxSpeed)
-#         normalizedReverseVelocity = max(0.0, self.vel / self.maxReverseSpeed)
-#         if self.driftMomentum > 0:
-#             normalizedPosDrift = self.driftMomentum / 5
-#             normalizedNegDrift = 0
-#         else:
-#             normalizedPosDrift = 0
-#             normalizedNegDrift = self.driftMomentum / -5
-#
-#         normalizedAngleOfNextGate = (get_angle(self.direction) - get_angle(self.directionToRewardGate)) % 360
-#         if normalizedAngleOfNextGate > 180:
-#             normalizedAngleOfNextGate = -1 * (360 - normalizedAngleOfNextGate)
-#
-#         normalizedAngleOfNextGate /= 180
-#
-#         normalizedState = [*normalizedVisionVectors, normalizedForwardVelocity, normalizedReverseVelocity,
-#                            normalizedPosDrift, normalizedNegDrift, normalizedAngleOfNextGate]
-#         return np.array(normalizedState)

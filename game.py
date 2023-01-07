@@ -1,3 +1,4 @@
+import os
 import pygame
 import numpy as np
 from car import Car
@@ -10,7 +11,7 @@ FPS = 30
 
 class Game:
     actions_count = 9
-    states_size = 3
+    states_size = 4
     frame_rate = FPS
 
     def __init__(self, ai_mode=False, debug=False):

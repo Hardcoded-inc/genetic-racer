@@ -16,7 +16,7 @@ class Gate:
         self.gate = scale_image(pygame.image.load("img/gates/{}.png".format(self.index)), 0.9)
         self.gate_mask = pygame.mask.from_surface(self.gate)
 
-        car.update_currect_gate(self)
+        car.update_current_gate(self)
 
     def draw(self):
         self.screen.blit(self.gate, (0, 0))
