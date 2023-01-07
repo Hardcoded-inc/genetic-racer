@@ -7,8 +7,8 @@ from gate import Gate
 
 
 
-START_POSITION = (180, 200)
-START_ANGLE = 0
+START_POSITION = (65, 200)
+START_ANGLE = 180
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
