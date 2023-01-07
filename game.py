@@ -72,8 +72,8 @@ class Game:
     def draw(self):
         # Draw the track, car and gate
         self.screen.blit(self.bg, (0, 0))
-        if(self.debug): self.car.gate.draw()
         if(not self.eagle_vision): self.track.draw()
+        self.car.gate.draw()
         self.car.draw()
 
         if self.car.collide(self.track.track_border_mask) is not None:

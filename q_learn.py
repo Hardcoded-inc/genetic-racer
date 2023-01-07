@@ -27,12 +27,12 @@ class QLAgent:
         self.max_steps = 5000           # for episode
         self.max_tau = 10000            # Tau is the step where we update our target network
 
-        self.batch_size = 64
+        self.batch_size = 200
         self.memory_size = 100000       # Number of experiences the ReplayMemory can keep
 
         self.pretrain_length = self.batch_size      # Number of experiences collected before training
 
-        self.autosave_freq = 1000
+        self.autosave_freq = 100
         self.save_dir_path = "./models"
 
         # ------------------------ #
@@ -86,7 +86,6 @@ class QLAgent:
         # for step in range(self.pretrain_length):
             nonlocal step
             nonlocal state
-            nonlocal new_episode
 
             print(f"[Pre-Training] Step {step}")
             if step == 0:
@@ -102,7 +101,6 @@ class QLAgent:
 
             if self.game.is_episode_finished():
                 reward = -100
-                new_episode = True
                 self.replay_memory.store((state, action, reward, next_state, True))
                 self.game.new_episode()
                 state = self.game.get_state()
@@ -128,7 +126,6 @@ class QLAgent:
         step = 0
         training_step = 0
         episode_no = 0
-        new_episode = False
 
         def step_function():
             nonlocal tau
@@ -136,15 +133,13 @@ class QLAgent:
             nonlocal step
             nonlocal training_step
             nonlocal episode_no
-            nonlocal new_episode
 
-            print(f"[Training] Step {step}")
 
             if training_step == 0:
                 state = self.game.get_state()
 
-            if new_episode:
-                state = self.game.get_state()
+            if episode_no % 25 == 0:
+            print(f"[Training] Episode: {episode_no}, {episode_no/self.total_episodes * 100}%")
 
             if step < self.max_steps:
                 step += 1
@@ -165,7 +160,7 @@ class QLAgent:
                 else:
                     computing_input_data = np.transpose(np.array([state]))
                     action_q_values = self.dq_network.full_forward_propagation(computing_input_data)
-                    action = acaction_q_values
+                    action = action_q_values
                     action_no = np.argmax(action)
 
                 # now we need to get next state
@@ -256,8 +251,8 @@ class QLAgent:
 
 
             if self.game.is_episode_finished() or step >= self.max_steps:
-                reward = -100
-                new_episode = True
+                if self.game.is_episode_finished(): reward = -100
+
                 self.replay_memory.store((state, action, reward, next_state, True))
 
                 step = 0
@@ -268,28 +263,30 @@ class QLAgent:
                     self.training = False
 
                 if episode_no % self.autosave_freq == 0:
-                    self.save_model()
+                    self.save_model(episode_no)
                     print("Model Saved")
             else:
                 self.replay_memory.store((state, action, reward, next_state, False))
                 state = next_state
 
             self.game.clock.tick()
+            return self.training
+
 
 
         self.game.run_for_agent(step_function)
         print("Training finished!")
 
 
-def save_model(self):
-    directory = f"{self.save_dir_path}/model{episode_no}"
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+    def save_model(self, episode_no):
+        directory = f"{self.save_dir_path}/model{episode_no}"
+        if not os.path.exists(directory):
+            os.makedirs(directory)
 
-    # TODO
-    # What to save?
-    # self.target_network.params_values
-    # save(f"{self.save_dir_path}/model{episode_no}/model.ckpt")
+        # TODO
+        # What to save?
+        # self.target_network.params_values
+        # save(f"{self.save_dir_path}/model{episode_no}/model.ckpt")
 
 
 
