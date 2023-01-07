@@ -27,7 +27,7 @@ if __name__ == "__main__":
         game = Game(ai_mode=True, debug=debug, eagle_vision=eagle_vision)
         ql_agent = QLAgent(game)
         ql_agent.pretrain()
-        ql_agent.pretrain()
+        ql_agent.train()
     else:
         game = Game(debug=debug, eagle_vision=eagle_vision)
         game.run()

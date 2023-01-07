@@ -10,6 +10,7 @@ START_ANGLE = 0
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
+TRANSPARENT = (0,0,0,0)
 RAY_LEN = 560
 
 class Car:
@@ -163,12 +164,14 @@ class Car:
 
 
     def check_reward_gates(self):
+        reward = 0
         if self.collide(self.gate.mask) is not None:
             self.score += 1
             # initialize next gate
             self.gate = Gate(self.screen, self, self.gate)
             # return reward
-            return self.gate.reward_val
+            reward = self.gate.reward_val
+        return reward
 
 
 
@@ -191,11 +194,11 @@ class Car:
         x_dest = 405 + 810 * abs(c)
         y_dest = 405 + 810 * abs(s)
 
-        beam_surface.fill((0, 0, 0, 0))
+        beam_surface.fill(TRANSPARENT)
 
-        if self.debug or self.eagle_vision:
-            pygame.draw.line(beam_surface, color, (405, 405), (x_dest, y_dest))
+        # if not (self.debug or self.eagle_vision): color = TRANSPARENT
 
+        pygame.draw.line(beam_surface, color, (405, 405), (x_dest, y_dest))
         beam_mask = pygame.mask.from_surface(beam_surface)
 
         offset_x = 405 - pos[0] if flip_x else pos[0] - 405

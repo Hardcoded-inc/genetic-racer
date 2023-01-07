@@ -30,6 +30,9 @@ class NeuralNetwork:
         self.epochs = DEFAULT_EPOCHS
         self.learning_rate = learning_rate
 
+        self.init_layers()
+
+
 
 
     def single_layer_forward_propagation(self, A_prev, W_curr, b_curr, activation="relu"):
@@ -47,9 +50,9 @@ class NeuralNetwork:
         return activation_func(Z_curr), Z_curr
 
 
-    def full_forward_propagation(self):
+    def full_forward_propagation(self, X):
         memory = {}
-        A_curr = self.X
+        A_curr = X
 
         for idx, layer in enumerate(self.nn_architecture):
             layer_idx = idx + 1
@@ -64,7 +67,6 @@ class NeuralNetwork:
             memory["Z" + str(layer_idx)] = Z_curr
 
         return A_curr, memory
-
 
 
 
@@ -165,7 +167,7 @@ class NeuralNetwork:
 
         for i in range(self.epochs):
             # step forward
-            Y_hat, cashe = self.full_forward_propagation()
+            Y_hat, cashe = self.full_forward_propagation(self.X)
 
             # calculating metrics and saving them in history
             cost = self.get_cost_value(Y_hat)

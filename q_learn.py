@@ -16,7 +16,7 @@ class QLAgent:
         #       Model params       #
         # ------------------------ #
         self.possible_actions = np.identity(game.actions_count, dtype=int)
-        self.state_size = [game.state_size]
+        self.state_size = game.state_size
         self.actions_size = game.actions_count
         self.learning_rate = 0.00025
 
@@ -30,7 +30,7 @@ class QLAgent:
         self.batch_size = 64
         self.memory_size = 100000       # Number of experiences the ReplayMemory can keep
 
-        self.pretrain_length = 50      # Number of experiences collected before training
+        self.pretrain_length = 64      # Number of experiences collected before training
 
         self.autosave_freq = 1000
         self.save_dir_path = "./models"
@@ -73,8 +73,8 @@ class QLAgent:
     def update_target_network_params(self):
         # Copy NN params from dq_n to target_n
         for fieldname in ["cost_history", "accuracy_history", "params_values"]:
-            buff = getattr(dq_network, fieldname)
-            setattr(target_network, fieldname, buff)
+            buff = getattr(self.dq_network, fieldname)
+            setattr(self.target_network, fieldname, buff)
 
     def pretrain(self):
         print("Start pretraining...")
@@ -89,7 +89,7 @@ class QLAgent:
             nonlocal state
             nonlocal new_episode
 
-            print(f"step {step}")
+            print(f"[Pre-Trainingraining] Step {step}")
             if step == 0:
                 state = self.game.get_state()
 
@@ -126,22 +126,33 @@ class QLAgent:
     def train(self):
         tau = 0
         state = []
-        step_no = 0
-        training_step_no = 0
+        step = 0
+        training_step = 0
         episode_no = 0
         new_episode = False
 
+        self.game.new_episode()
+
         def step_function():
-            if training_step_no == 0:
+            nonlocal tau
+            nonlocal state
+            nonlocal step
+            nonlocal training_step
+            nonlocal episode_no
+            nonlocal new_episode
+
+            print(f"[Training] Step {step}")
+
+            if training_step == 0:
                 state = self.game.get_state()
 
             if new_episode:
                 state = self.game.get_state()
 
-            if step_no < self.max_steps:
-                step_no += 1
+            if step < self.max_steps:
+                step += 1
                 self.decay_step += 1
-                training_step_no += 1
+                training_step += 1
                 tau += 1
 
                 # choose best action if not exploring choose random otherwise
@@ -149,14 +160,14 @@ class QLAgent:
                 epsilon = self.min_epsilon + (self.max_epsilon - self.min_epsilon) * np.exp(
                     -self.decay_rate * self.decay_step)
 
-                if np.random.rand() < epsilon:
+                # if np.random.rand() < epsilon:
+                if False:
                     choice = random.randint(1, len(self.possible_actions)) - 1
                     action = self.possible_actions[choice]
 
                 else:
-                    # TODO
-                    q_values = self.sess.run(self.dq_network.output,
-                                            feed_dict={self.dq_network.inputs_: np.array([state])})
+                    (q_values, _memory) = self.dq_network.full_forward_propagation(np.transpose(np.array([state])))
+
                     choice = np.argmax(q_values)
                     action = self.possible_actions[choice]
 
@@ -171,11 +182,11 @@ class QLAgent:
                 # if car is dead then finish episode
                 if self.game.is_episode_finished():
                     reward = -100
-                    step_no = self.max_steps
+                    step = self.max_steps
                     print("DEAD!! Reward =  -100")
 
                 # print("Episode {} Step {} Action {} reward {} epsilon {} experiences stored {}"
-                #       .format(episode_no, step_no, action_no, reward, epsilon, training_step_no))
+                #       .format(episode_no, step, action_no, reward, epsilon, training_step))
 
                 # add the experience to the memory buffer
                 self.replay_memory.store((state, action, reward, next_state, self.game.is_episode_finished()))
@@ -188,9 +199,9 @@ class QLAgent:
                 print("Target Network Updated")
                 tau = 0
 
-            if step_no >= self.max_steps:
+            if step >= self.max_steps:
                 episode_no += 1
-                step_no = 0
+                step = 0
                 new_episode = True
                 self.game.new_episode()
                 if episode_no >= self.total_episodes:
