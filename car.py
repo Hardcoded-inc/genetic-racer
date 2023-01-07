@@ -3,6 +3,8 @@ import math
 import numpy as np
 from utils import scale_image, flip_surface
 from gate import Gate
+# from math import degrees, atan2
+
 
 
 START_POSITION = (180, 200)
@@ -42,7 +44,7 @@ class Car:
         self.acceleration_rate = 0.2
         self.braking_rate = 0.7
         self.deceleration_rate = 0.1
-        self.steering = 10
+        self.steering = 9
 
         self.beam_surface = pygame.Surface((RAY_LEN, RAY_LEN), pygame.SRCALPHA)
         self.flipped_masks = flip_surface(track.track_border)
@@ -65,9 +67,13 @@ class Car:
 
     def turn_left(self):
         self.angle += self.steering
+        self.angle = self.angle % 359
 
     def turn_right(self):
-        self.angle -= self.steering
+        if(self.angle - self.steering < 0):
+            self.angle = 359 - self.angle
+        else:
+            self.angle -= self.steering
 
     def move(self):
         radians = math.radians(self.angle)
@@ -157,6 +163,8 @@ class Car:
             # Draw the rotated image
             self.screen.blit(rotated_image, rotated_rect)
 
+            # self.gate_angle = self.get_angle(self.gate.gate)
+
             self.wall_beam_distances = self.draw_beams(self.flipped_masks, self.beam_surface, BLUE)
 
             if self.gate is not None:
@@ -172,6 +180,21 @@ class Car:
             # return reward
             reward = self.gate.reward_val
         return reward
+
+#
+#     def get_angle(self, target):
+#
+#         y_diff = target.get_rect().y - self.rect.y
+#         print(target.get_rect().y)
+#         print(self.rect.y)
+#         x_diff = target.get_rect().x - self.rect.x
+#         angle = atan2(y_diff, x_diff)
+#
+#         bearing1 = (angle + 359) % 359
+#         bearing2 = (90 - angle) % 359
+#         print("angle=%6.1f bearing1=%5.1f bearing2=%5.1f" % ( angle, bearing1, bearing2))
+#
+#         return angle
 
 
 
@@ -227,9 +250,16 @@ class Car:
             if(beam == None): normalized_gate_beams.append(0)
             else: normalized_gate_beams.append(1 - (max(1.0, beam) / max_ray_length))
 
-        normalized_velocity = max(0.0, self.vel / self.max_vel)
-        normalized_angle = max(0.0, (self.angle + 180) / 360)
+        # normalized_gate_indicators = []
+        # for beam in self.gate_beam_distances:
+        #     if(beam == None): normalized_gate_indicators.append(0)
+        #     else: normalized_gate_indicators.append(1)
 
-        normalized_state = [*normalized_wall_beams, *normalized_gate_beams, normalized_velocity, normalized_angle]
+
+        normalized_velocity = max(0.0, self.vel / self.max_vel)
+        normalized_angle = max(0.0, (self.angle / 359))
+
+        normalized_state = [*normalized_wall_beams, *normalized_gate_indicators, normalized_velocity, normalized_angle]
         return np.array(normalized_state)
+
 

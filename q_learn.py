@@ -250,10 +250,7 @@ class QLAgent:
                 print("Target Network Updated")
                 tau = 0
 
-
-            if self.game.is_episode_finished() or step >= self.max_steps:
-                if self.game.is_episode_finished(): reward = -100
-
+            if step >= self.max_steps:
                 self.replay_memory.store((state, action, reward, next_state, True))
 
                 step = 0

@@ -68,6 +68,7 @@ class Game:
         print(f"Border distances: \n{self.car.wall_beam_distances} \n")
         print(f"Gate distances: \n{self.car.gate_beam_distances} \n")
         print(f"Car state: \n{self.car.get_state()}\n")
+        print(f"Car angle: \n{self.car.angle}\n")
 
     def draw(self):
         # Draw the track, car and gate
