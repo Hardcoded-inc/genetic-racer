@@ -41,10 +41,10 @@ class Car:
 
         # Set the car's acceleration, deceleration, and steering
         self.max_vel = 20
-        self.acceleration_rate = 0.2
+        self.acceleration_rate = 0.4
         self.braking_rate = 0.7
         self.deceleration_rate = 0.1
-        self.steering = 9
+        self.steering = 5
 
         self.beam_surface = pygame.Surface((RAY_LEN, RAY_LEN), pygame.SRCALPHA)
         self.flipped_masks = flip_surface(track.track_border)
