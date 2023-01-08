@@ -1,5 +1,6 @@
 from utils import sigmoid, relu, sigmoid_backward, relu_backward, convert_prob_into_class
 import numpy as np
+import pickle
 
 DEFAULT_SEED = 99
 DEFAULT_EPOCHS = 10000
@@ -70,31 +71,30 @@ class NeuralNetwork:
 
 
 
-    def mse_loss(self, y_pred, y_true):
+    def mse_loss(self, targets, y_pred):
         """
-        Computes the mean squared error loss.
-
-        Arguments:
-        - y_pred: list of length n
-            List containing the predicted output.
-        - y_true: list of length n
-            List containing the true output.
-
-        Returns:
-        - loss: float
-            Scalar value containing the MSE loss.
+        Computes Mean Squared error/loss between targets
+        and predictions.
+        Input: predictions (N, k) ndarray (N: no. of samples, k: no. of output nodes)
+            targets (N, k) ndarray        (N: no. of samples, k: no. of output nodes)
+        Returns: scalar
+        Note: The averaging is only done over the output nodes and not over the samples in a batch.
+        Therefore, to get an answer similar to PyTorch, one must divide the result by the batch size.
         """
-        # Check that the input lists have the same length
-        if len(y_pred) != len(y_true):
-            raise ValueError("y_pred and y_true must have the same length")
+        return np.sum((y_pred - targets)**2) / y_pred.shape[1]
 
-        # Compute the squared difference between the predicted output and the true output
-        squared_diff = [(y_pred[i] - y_true[i]) ** 2 for i in range(len(y_pred))]
+    def mse_loss_grad(self, targets, y_pred):
+        """
+        Computes mean squared error gradient between targets
+        and predictions.
+        Input: predictions (N, k) ndarray (N: no. of samples, k: no. of output nodes)
+            targets (N, k) ndarray        (N: no. of samples, k: no. of output nodes)
+        Returns: (N,k) ndarray
+        Note: The averaging is only done over the output nodes and not over the samples in a batch.
+        Therefore, to get an answer similar to PyTorch, one must divide the result by the batch size.
+        """
 
-        # Compute the mean of the squared difference
-        loss = sum(squared_diff) / len(squared_diff)
-
-        return loss
+        return 2 * (y_pred - targets) / y_pred.shape[1]
 
 
     def get_cost_value(self, Y_hat):
@@ -136,7 +136,11 @@ class NeuralNetwork:
         m = Y.shape[1]
         Y = Y.reshape(Y_hat.shape)
 
-        dA_prev = - (np.divide(Y, Y_hat) - np.divide(1 - Y, 1 - Y_hat));
+        # Replaced Cress-Entropy Loss
+        dA_prev = - (np.divide(Y, Y_hat) - np.divide(1 - Y, 1 - Y_hat))
+
+        # MSE_Loss <- Seems not to work well
+        # dA_prev = self.mse_loss_grad(Y, Y_hat)
 
         for layer_idx_prev, layer in reversed(list(enumerate(self.nn_architecture))):
             layer_idx_curr = layer_idx_prev + 1
@@ -198,6 +202,19 @@ class NeuralNetwork:
                     print("Iteration: {:05} - cost: {:.5f} - accuracy: {:.5f}".format(i, cost, accuracy))
                 if(self.callback != None):
                     callback(i, params_values)
+
+
+    def save(self, path):
+        for field_name in [ "params_values", "memory", "nn_architecture"]:
+            with open(f'{path}/{field_name}.pkl', 'wb') as outfile:
+                data = getattr(self, field_name)
+                pickle.dump(data, outfile)
+
+    def load(self, path):
+        for field_name in [ "params_values", "memory", "nn_architecture"]:
+            with open(f'{path}/{field_name}.pkl', 'rb') as infile:
+                data = pickle.load(infile)
+                setattr(self, field_name, data)
 
 
 

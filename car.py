@@ -25,7 +25,7 @@ class Car:
         # Set the car's starting position and angle
         image = pygame.image.load("img/car.png")
         image = pygame.transform.scale(image, (48, 96))
-        self.image = scale_image(image, 0.3)
+        self.image = scale_image(image, 0.4)
         self.rect = self.image.get_rect()
         self.rect.center = START_POSITION
         self.beams_count = 8
@@ -41,7 +41,7 @@ class Car:
 
         # Set the car's acceleration, deceleration, and steering
         self.max_vel = 20
-        self.acceleration_rate = 0.4
+        self.acceleration_rate = 0.3
         self.braking_rate = 0.7
         self.deceleration_rate = 0.1
         self.steering = 5
