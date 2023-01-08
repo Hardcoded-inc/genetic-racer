@@ -14,3 +14,10 @@ pip install -r requiremenst.txt
 ```bash
 python main.py
 ```
+```
+options:
+
+  -ai  Starts AI session
+  -d   Debug mode 
+  -ev  Eagle Vision
+```
