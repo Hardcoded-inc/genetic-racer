@@ -7,8 +7,9 @@ import random
 import os
 
 class QLAgent:
-    def __init__(self, game):
+    def __init__(self, game, name):
 
+        self.name = name
         self.game = game
         self.pretrained = False
 
@@ -23,6 +24,7 @@ class QLAgent:
         # ------------------------ #
         #      Training params     #
         # ------------------------ #
+        self.self.current_episode = 0
         self.total_episodes = 100000
         self.max_steps = 5000           # for episode
         self.max_tau = 10000            # Tau is the step where we update our target network
@@ -115,7 +117,7 @@ class QLAgent:
 
         self.game.run_for_agent(step_function)
         self.update_target_network_params()
-        print("Pre-Training finished!")
+        print("✅ Pre-Training finished!")
 
 
 
@@ -125,22 +127,20 @@ class QLAgent:
         state = []
         step = 0
         training_step = 0
-        episode_no = 0
+        self.current_episode = 0
 
         def step_function():
             nonlocal tau
             nonlocal state
             nonlocal step
             nonlocal training_step
-            nonlocal episode_no
-
 
             if training_step == 0:
                 state = self.game.get_state()
 
-            if episode_no % 25 == 0 and step == 0:
-                percentage = episode_no / self.total_episodes * 100
-                print(f"[Training] Episode: {episode_no}, {percentage}%")
+            if step == 0:
+                percentage = self.current_episode / self.total_episodes * 100
+                print(f"\n[Training] Episode: {self.current_episode}, {percentage}%")
 
 
             if step < self.max_steps:
@@ -171,15 +171,15 @@ class QLAgent:
                 next_state = self.game.get_state()
 
                 if (reward > 0):
-                    print(f"Hell YEAH, Reward = {reward}")
+                    print(f"   > ⛩️  Gate  |  Reward: {reward}")
                 # if car is dead then finish episode
                 if self.game.is_episode_finished():
                     reward = -100
                     step = self.max_steps
-                    print("DEAD!! Reward =  -100")
+                    print("   > 💀  DEAD  |  Reward: -100\n")
 
                 # print("Episode {} Step {} Action {} reward {} epsilon {} experiences stored {}"
-                #       .format(episode_no, step, action_no, reward, epsilon, training_step))
+                #       .format(self.current_episode, step, action_no, reward, epsilon, training_step))
 
                 # add the experience to the memory buffer
                 self.replay_memory.store((state, action, reward, next_state, self.game.is_episode_finished()))
@@ -249,23 +249,23 @@ class QLAgent:
 
             if tau > self.max_tau:
                 self.update_target_network_params()
-                print("Target Network Updated")
+                print("🗄️ Target Network Updated")
                 tau = 0
 
             if step >= self.max_steps:
                 self.replay_memory.store((state, action, reward, next_state, True))
 
                 step = 0
-                episode_no += 1
+                self.current_episode += 1
                 self.game.new_episode()
                 state = self.game.get_state()
 
-                if episode_no >= self.total_episodes:
+                if self.current_episode >= self.total_episodes:
                     self.training = False
 
-                if episode_no % self.autosave_freq == 0:
-                    self.save_model(episode_no)
-                    print("Model Saved")
+                if self.current_episode % self.autosave_freq == 0:
+                    self.save_model(self.current_episode)
+                    print("💽 Model Saved")
             else:
                 self.replay_memory.store((state, action, reward, next_state, False))
                 state = next_state
@@ -276,7 +276,7 @@ class QLAgent:
 
 
         self.game.run_for_agent(step_function)
-        print("Training finished!")
+        print("✅ Training finished!")
 
 
     # TODO:
@@ -284,20 +284,25 @@ class QLAgent:
     #    learning_rate, nn_architecture, memory, seed
 
     def save_model(self, episode_no):
-        directory = f"{self.save_dir_path}/model{episode_no}"
+        directory = f"{self.save_dir_path}/{self.name}/model{episode_no}"
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        save_path = f"{self.save_dir_path}/model{episode_no}/params_values.npy"
+        save_path = f"{directory}/params_values.npy"
         content = self.dq_network.params_values
         np.save(save_path, content)
 
 
-    def load_model(self, model_name):
-        path = f"{self.save_dir_path}/{model_name}/params_values.npy"
-        params_values = np.load(path)
-        self.dq_network.params_values = params_values
-        self.target_network.params_values = params_values
+    def load_model(self, model_name, episode_no):
+        directory = f"{self.save_dir_path}/{self.name}/model{episode_no}"
+        if os.path.exists(directory):
+            params_path = f"{directory}/params_values.npy"
+            params_values = np.load(params_path, allow_pickle=True)
+            self.dq_network.params_values = params_values
+            self.target_network.params_values = params_values
+            self.current_episode = episode_no
+        else:
+            print("⛔️ No such model:episode")
 
 
 #     def test(self):

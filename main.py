@@ -25,11 +25,15 @@ if __name__ == "__main__":
     if ai_mode:
         print("Started in AI Mode")
         game = Game(ai_mode=True, debug=debug, eagle_vision=eagle_vision)
-        ql_agent = QLAgent(game)
-        ql_agent.pretrain()
-        ql_agent.total_episodes = 1000
-        ql_agent.max_steps = 2000
-        ql_agent.train()
+        ql_agent = QLAgent(game, "Agent_700")
+        ql_agent.load_model("Agent_700", 21)
+
+        # ql_agent.pretrain_length = 100
+        # ql_agent.pretrain()
+        # ql_agent.total_episodes = 21
+        # ql_agent.max_steps = 2000
+        # ql_agent.train()
+        # ql_agent.save_model(21)
 
     else:
         game = Game(debug=debug, eagle_vision=eagle_vision)
