@@ -1,7 +1,7 @@
 # Genetic Racer (Reinforcement Learning edition)
 
 A racing game PyGame driven, possessed by the AI driver.  
-Learned with ~genetic~ DQ-Learning algorithm based od NumPy (without ML/NN ready-made solutions).
+Learned with ~genetic~ DQ-Learning algorithm based on NumPy (without ML/NN ready-made solutions).
 
 ## Prequisites
 
