@@ -40,7 +40,7 @@ class QLAgent:
         # ------------------------ #
         #     Q-learning params    #
         # ------------------------ #
-        self.gamma = 0.9                # Discounting rate
+        self.gamma = 0.95                # Discounting rate
         self.training = True
 
 
