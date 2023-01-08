@@ -6,6 +6,7 @@ def scale_image(img, factor):
     return pygame.transform.scale(img, size)
 
 def sigmoid(Z):
+    Z = np.clip(Z, -500, 500)
     return 1/(1+np.exp(-Z))
 
 def relu(Z):
