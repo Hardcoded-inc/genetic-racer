@@ -24,7 +24,7 @@ class QLAgent:
         # ------------------------ #
         #      Training params     #
         # ------------------------ #
-        self.self.current_episode = 0
+        self.current_episode = 0
         self.total_episodes = 100000
         self.max_steps = 5000           # for episode
         self.max_tau = 10000            # Tau is the step where we update our target network
@@ -89,7 +89,9 @@ class QLAgent:
             nonlocal step
             nonlocal state
 
-            print(f"[Pre-Training] Step {step}")
+            if step % 10 == 0:
+                print(f"[Pre-Training] Step {step}")
+
             if step == 0:
                 state = self.game.get_state()
 
@@ -123,11 +125,15 @@ class QLAgent:
 
 
     def train(self):
+        if self.current_episode == 0:
+            print("Starting training...")
+        else:
+            print("Resuming training...")
+
         tau = 0
         state = []
         step = 0
         training_step = 0
-        self.current_episode = 0
 
         def step_function():
             nonlocal tau
@@ -176,7 +182,7 @@ class QLAgent:
                 if self.game.is_episode_finished():
                     reward = -100
                     step = self.max_steps
-                    print("   > 💀  DEAD  |  Reward: -100\n")
+                    print("   > 💀 DEAD  |  Reward: -100\n")
 
                 # print("Episode {} Step {} Action {} reward {} epsilon {} experiences stored {}"
                 #       .format(self.current_episode, step, action_no, reward, epsilon, training_step))
@@ -288,21 +294,18 @@ class QLAgent:
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        save_path = f"{directory}/params_values.npy"
-        content = self.dq_network.params_values
-        np.save(save_path, content)
+        self.dq_network.save(directory)
 
 
     def load_model(self, model_name, episode_no):
         directory = f"{self.save_dir_path}/{self.name}/model{episode_no}"
         if os.path.exists(directory):
-            params_path = f"{directory}/params_values.npy"
-            params_values = np.load(params_path, allow_pickle=True)
-            self.dq_network.params_values = params_values
-            self.target_network.params_values = params_values
+            self.dq_network.load(directory)
+            self.target_network.load(directory)
             self.current_episode = episode_no
+            print(f"✅ {model_name} model [Episde: {episode_no}] loaded")
         else:
-            print("⛔️ No such model:episode")
+            print("⛔️ No such model:episode checkpoint")
 
 
 #     def test(self):

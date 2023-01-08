@@ -1,5 +1,6 @@
 from utils import sigmoid, relu, sigmoid_backward, relu_backward, convert_prob_into_class
 import numpy as np
+import pickle
 
 DEFAULT_SEED = 99
 DEFAULT_EPOCHS = 10000
@@ -198,6 +199,19 @@ class NeuralNetwork:
                     print("Iteration: {:05} - cost: {:.5f} - accuracy: {:.5f}".format(i, cost, accuracy))
                 if(self.callback != None):
                     callback(i, params_values)
+
+
+    def save(self, path):
+        for field_name in [ "params_values", "memory", "nn_architecture"]:
+            with open(f'{path}/{field_name}.pkl', 'wb') as outfile:
+                data = getattr(self, field_name)
+                pickle.dump(data, outfile)
+
+    def load(self, path):
+        for field_name in [ "params_values", "memory", "nn_architecture"]:
+            with open(f'{path}/{field_name}.pkl', 'rb') as infile:
+                data = pickle.load(infile)
+                setattr(self, field_name, data)
 
 
 
