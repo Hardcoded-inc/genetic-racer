@@ -160,6 +160,8 @@ class QLAgent:
                 epsilon = self.min_epsilon + (self.max_epsilon - self.min_epsilon) * np.exp(
                     -self.decay_rate * self.decay_step)
 
+                if(step == 1): print(f"Epsilon: {epsilon}")
+
                 action = None
                 if np.random.rand() < epsilon:
                     action = random.choice(self.possible_actions)
@@ -178,14 +180,15 @@ class QLAgent:
 
                 if (reward > 0):
                     print(f"   > ⛩️  Gate  |  Reward: {reward}")
+                    # print(f"\nstate: {state}")
+                    # print(f"\naction: {action}")
+
                 # if car is dead then finish episode
                 if self.game.is_episode_finished():
                     reward = -100
                     step = self.max_steps
-                    print("   > 💀 DEAD  |  Reward: -100\n")
+                    print(f"   > 💀 DEAD  |  Reward: {reward}\n")
 
-                # print("Episode {} Step {} Action {} reward {} epsilon {} experiences stored {}"
-                #       .format(self.current_episode, step, action_no, reward, epsilon, training_step))
 
                 # add the experience to the memory buffer
                 self.replay_memory.store((state, action, reward, next_state, self.game.is_episode_finished()))
@@ -242,9 +245,9 @@ class QLAgent:
                     output_q_values.append(value)
 
 
-                # TODO: What about the loss function?
-                # loss = self.mse_loss(targets_for_batch, output_q_values)
-                # loss = (targets_for_batch - output_q_values)^2
+                # if(step == self.max_steps):
+                #     loss = self.dq_network.mse_loss(np.array([targets_for_batch]), np.array([output_q_values]))
+                #     print(f"Current loss: {loss}")
 
                 # step backward - calculating gradient
                 grads_values = self.dq_network.full_backward_propagation(np.array([targets_for_batch]), np.array([output_q_values]))
@@ -285,14 +288,15 @@ class QLAgent:
         print("✅ Training finished!")
 
 
-    # TODO:
-    # Add some other NN params, like:
-    #    learning_rate, nn_architecture, memory, seed
 
     def save_model(self, episode_no):
         directory = f"{self.save_dir_path}/{self.name}/model{episode_no}"
         if not os.path.exists(directory):
             os.makedirs(directory)
+
+        with open(f"{directory}/agent_params.txt", 'w') as file:
+            content = self.decay_step
+            file.write(str(content))
 
         self.dq_network.save(directory)
 
@@ -303,6 +307,11 @@ class QLAgent:
             self.dq_network.load(directory)
             self.target_network.load(directory)
             self.current_episode = episode_no
+
+            with open(f"{directory}/agent_params.txt", 'r') as file:
+                content = file.read()
+                self.decay_step = int(content)
+
             print(f"✅ {model_name} model [Episde: {episode_no}] loaded")
         else:
             print("⛔️ No such model:episode checkpoint")
