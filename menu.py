@@ -27,6 +27,9 @@ class Menu:
         self.font = pygame.font.Font(None, 64)
         self.options = ["Free ride", "Load model", "Train model", "Free ride for agent", "Exit"]
 
+        self.agent_name = None
+        self.episode_no = 0
+
         self.selected_index = 0
         self.model_file_name = None
 
@@ -88,7 +91,15 @@ class Menu:
     def train_model(self):
         print("Started in AI Mode")
         game = Game(self.screen, self.clock, self.ai_mode, self.debug, self.eagle_vision)
-        ql_agent = QLAgent(game)
+
+        agent_name = "Agent_2137"
+        if self.agent_name is not None:
+            agent_name = self.agent_name
+        ql_agent = QLAgent(game, agent_name)
+
+        if int(self.episode_no) > 0:
+            ql_agent.load_model(agent_name, int(self.episode_no))
+
         try:
             ql_agent.pretrain()
             ql_agent.train()
@@ -96,7 +107,8 @@ class Menu:
             print("Training interrupted...")
 
     def render_file_load(self):
-        model_file_name = self.model_file_name or ""
+        input_value = self.agent_name or ""
+        episode_input = False
         while True:
             for event in pygame.event.get():
 
@@ -108,12 +120,18 @@ class Menu:
                         return
                     if event.key == pygame.K_RETURN:
                         # save model name and exit
-                        self.model_file_name = model_file_name
-                        return
+                        if not episode_input:
+                            self.agent_name = input_value
+                            episode_input = True
+                            input_value = ""
+                        else:
+                            self.episode_no = input_value
+                            return
+
                     if event.key == pygame.K_BACKSPACE:
-                        model_file_name = model_file_name[:-1]
+                        input_value = input_value[:-1]
                     else:
-                        model_file_name += event.unicode
+                        input_value += event.unicode
 
             self.screen.fill(BLACK)
             self.screen.blit(self.background_img, self.background_img_position)
@@ -124,7 +142,7 @@ class Menu:
 
             font = pygame.font.Font(None, 28)
 
-            text_surface = font.render(model_file_name, True, (255, 255, 255))
+            text_surface = font.render(input_value, True, (255, 255, 255))
 
             self.screen.blit(text_surface, (input_rect.x+5, input_rect.y+13))
 
