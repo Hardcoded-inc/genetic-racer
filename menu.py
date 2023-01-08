@@ -11,9 +11,9 @@ WIDTH, HEIGHT = (810, 810)
 FPS = 30
 
 class Menu:
-    def __init__(self, ai_mode=False, debug=False, eagle_vision=False):
+    def __init__(self, debug=False, eagle_vision=False):
         pygame.init()
-        self.ai_mode = ai_mode
+        # self.ai_mode = ai_mode
         self.debug = debug
         self.eagle_vision = eagle_vision
 
@@ -85,12 +85,12 @@ class Menu:
                     sys.exit()
 
     def start_game(self):
-        game = Game(self.screen, self.clock, self.ai_mode, self.debug, self.eagle_vision)
+        game = Game(self.screen, self.clock, False, self.debug, self.eagle_vision)
         game.run()
 
     def train_model(self):
         print("Started in AI Mode")
-        game = Game(self.screen, self.clock, self.ai_mode, self.debug, self.eagle_vision)
+        game = Game(self.screen, self.clock, True, self.debug, self.eagle_vision)
 
         agent_name = "Agent_2137"
         if self.agent_name is not None:
