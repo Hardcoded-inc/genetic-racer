@@ -12,20 +12,17 @@ class Game:
     actions_count = 7
     state_size = 18
 
-    def __init__(self, ai_mode=False, debug=False, eagle_vision=False):
+    def __init__(self, screen, clock, ai_mode=False, debug=False, eagle_vision=False):
         pygame.init()
         self.ai_mode = ai_mode
         self.debug = debug
         self.eagle_vision = eagle_vision
 
-        # Set the window size and title
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        pygame.display.set_caption("Genetic Racer")
+        self.screen = screen
+        self.clock = clock
+
         self.bg = pygame.Surface((WIDTH, HEIGHT))
         self.bg.fill((0, 0, 0))
-
-        # Set the clock to control the frame rate
-        self.clock = pygame.time.Clock()
 
         # Create the track and car
         self.track = Track(self.screen)
@@ -38,8 +35,13 @@ class Game:
         while running:
             self.update()
             self.draw()
-            running = step_callback()
 
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        raise KeyboardInterrupt
+
+            running = step_callback()
 
     def run(self):
         # Main game loop
@@ -53,9 +55,9 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-
-        # pygame.quit()
-        # exit(0)
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        return
 
 
     def update(self):
@@ -85,6 +87,7 @@ class Game:
 
         # Update the display
         pygame.display.flip()
+
 
     # ------------------------ #
     #      Q-Learning API      #

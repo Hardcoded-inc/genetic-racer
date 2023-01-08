@@ -2,6 +2,7 @@ import sys
 import pygame
 from game import Game
 from q_learn import QLAgent
+from menu import Menu
 
 def print_menu():
     print("1. standardowa rozgrywka")
@@ -22,39 +23,5 @@ if __name__ == "__main__":
     debug = "-d" in args
     eagle_vision = "-ev" in args
 
-    if ai_mode:
-        print("Started in AI Mode")
-        game = Game(ai_mode=True, debug=debug, eagle_vision=eagle_vision)
-        ql_agent = QLAgent(game)
-        ql_agent.pretrain()
-        ql_agent.train()
-    else:
-        game = Game(debug=debug, eagle_vision=eagle_vision)
-        game.run()
-
-    # exit_app()
-
-#     while True:
-#         print_menu()
-#         choice = input("Enter a number (1-5): ")
-#         if choice == "1":
-#             game = Game(debug=debug)
-#             game.run()
-#         elif choice == "2":
-#             print("Started in AI Mode")
-#             game = Game(ai_mode=True, debug=debug)
-#             ql_agent = QLAgent(game)
-#             ql_agent.pretrain()
-#         elif choice == "3":
-#             pass
-#         elif choice == "4":
-#             pass
-#         elif choice == "0":
-#             exit(0)
-#         else:
-#             print("Invalid choice. Try again.")
-
-
-
-
-
+    menu = Menu(ai_mode, debug, eagle_vision)
+    menu.render()
