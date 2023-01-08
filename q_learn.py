@@ -138,9 +138,9 @@ class QLAgent:
             if training_step == 0:
                 state = self.game.get_state()
 
-                if episode_no % 25 == 0 and episode_no != 0:
-                    percentage = episode_no / self.total_episodes * 100
-                    print(f"[Training] Episode: {episode_no}, {percentage}%")
+            if episode_no % 25 == 0 and step == 0:
+                percentage = episode_no / self.total_episodes * 100
+                print(f"[Training] Episode: {episode_no}, {percentage}%")
 
 
             if step < self.max_steps:
@@ -279,14 +279,25 @@ class QLAgent:
         print("Training finished!")
 
 
+    # TODO:
+    # Add some other NN params, like:
+    #    learning_rate, nn_architecture, memory, seed
+
     def save_model(self, episode_no):
         directory = f"{self.save_dir_path}/model{episode_no}"
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        with open(f"{self.save_dir_path}/model{episode_no}/model.ckpt", 'w') as model_file:
-            model_file.write(str(self.dq_network.params_values))
+        save_path = f"{self.save_dir_path}/model{episode_no}/params_values.npy"
+        content = self.dq_network.params_values
+        np.save(save_path, content)
 
+
+    def load_model(self, model_name):
+        path = f"{self.save_dir_path}/{model_name}/params_values.npy"
+        params_values = np.load(path)
+        self.dq_network.params_values = params_values
+        self.target_network.params_values = params_values
 
 
 #     def test(self):
