@@ -136,11 +136,15 @@ class NeuralNetwork:
         m = Y.shape[1]
         Y = Y.reshape(Y_hat.shape)
 
-        # Replaced Cress-Entropy Loss
-        dA_prev = - (np.divide(Y, Y_hat) - np.divide(1 - Y, 1 - Y_hat))
+
+        # Cross-Entropy Loss
+        Y_hat = np.where(Y_hat == 0, 1e-7, Y_hat)
+        Y_hat_1 = np.where(Y_hat == 1, 1 - 1e-7, 1 - Y_hat)
+        dA_prev = - (np.divide(Y, Y_hat) - np.divide(1 - Y, Y_hat_1))
 
         # MSE_Loss <- Seems not to work well
         # dA_prev = self.mse_loss_grad(Y, Y_hat)
+
 
         for layer_idx_prev, layer in reversed(list(enumerate(self.nn_architecture))):
             layer_idx_curr = layer_idx_prev + 1
