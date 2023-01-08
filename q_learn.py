@@ -59,9 +59,10 @@ class QLAgent:
         #        Setup NNs         #
         # ------------------------ #
         self.nn_architecture = [
-            {"input_dim": self.state_size, "output_dim": 24, "activation": "relu"},
-            {"input_dim": 24, "output_dim": 24, "activation": "relu"},
-            {"input_dim": 24, "output_dim": self.actions_size, "activation": "sigmoid"},
+            {"input_dim": self.state_size, "output_dim": 36, "activation": "relu"},
+            {"input_dim": 36, "output_dim": 36, "activation": "relu"},
+            {"input_dim": 36, "output_dim": 36, "activation": "relu"},
+            {"input_dim": 36, "output_dim": self.actions_size, "activation": "sigmoid"},
         ]
 
         self.dq_network = NeuralNetwork(self.learning_rate, self.nn_architecture)
