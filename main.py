@@ -27,7 +27,7 @@ if __name__ == "__main__":
         game = Game(ai_mode=True, debug=debug, eagle_vision=eagle_vision)
         agent_name = "Agent_700"
         ql_agent = QLAgent(game, agent_name)
-        ql_agent.load_model(agent_name, 1000)
+        ql_agent.load_model(agent_name, 3000)
 
         ql_agent.pretrain()
         # ql_agent.total_episodes = 20
